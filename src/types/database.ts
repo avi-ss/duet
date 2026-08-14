@@ -33,17 +33,20 @@ export type Database = {
       couple_members: {
         Row: {
           couple_id: string
+          display_name: string | null
           joined_at: string
           role: MemberRole
           user_id: string
         }
         Insert: {
           couple_id: string
+          display_name?: string | null
           joined_at?: string
           role?: MemberRole
           user_id: string
         }
         Update: {
+          display_name?: string | null
           role?: MemberRole
         }
         Relationships: [

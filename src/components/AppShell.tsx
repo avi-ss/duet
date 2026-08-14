@@ -23,7 +23,7 @@ const navigation = [
 
 export function AppShell() {
   const { user, signOut } = useAuth()
-  const { couple } = useCouple()
+  const { couple, membership } = useCouple()
 
   return (
     <div className="app-shell">
@@ -52,9 +52,9 @@ export function AppShell() {
             <Settings size={18} /> Ajustes
           </NavLink>
           <div className="user-chip">
-            <span className="avatar">{getInitials(user?.email)}</span>
+            <span className="avatar">{getInitials(membership?.display_name ?? user?.email)}</span>
             <div>
-              <strong>{user?.email?.split('@')[0]}</strong>
+              <strong>{membership?.display_name ?? user?.email?.split('@')[0]}</strong>
               <small>{user?.email}</small>
             </div>
             <button

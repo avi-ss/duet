@@ -32,6 +32,9 @@ create table public.couple_members (
   couple_id uuid not null references public.couples(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   role public.member_role not null default 'member',
+  display_name text check (
+    display_name is null or char_length(trim(display_name)) between 1 and 50
+  ),
   joined_at timestamptz not null default now(),
   primary key (couple_id, user_id),
   unique (user_id)
@@ -201,6 +204,12 @@ on public.couple_members for select
 to authenticated
 using (public.is_couple_member(couple_id));
 
+create policy "Members can update their own profile"
+on public.couple_members for update
+to authenticated
+using (user_id = auth.uid() and public.is_couple_member(couple_id))
+with check (user_id = auth.uid() and public.is_couple_member(couple_id));
+
 create policy "Members can read items"
 on public.items for select
 to authenticated
@@ -229,6 +238,7 @@ using (public.is_couple_member(couple_id));
 revoke all on public.couples, public.couple_members, public.items from anon, authenticated;
 grant select on public.couples, public.couple_members, public.items to authenticated;
 grant update (name) on public.couples to authenticated;
+grant update (display_name) on public.couple_members to authenticated;
 grant insert (couple_id, type, title, description, url, image_url, metadata)
   on public.items to authenticated;
 grant update (type, title, description, url, image_url, is_pinned, metadata)

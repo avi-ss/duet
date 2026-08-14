@@ -12,9 +12,7 @@ export function Settings() {
   const [copied, setCopied] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [greetingName, setGreetingName] = useState(
-    typeof user?.user_metadata?.name === 'string'
-      ? user.user_metadata.name
-      : user?.email?.split('@')[0] ?? '',
+    membership?.display_name ?? user?.email?.split('@')[0] ?? '',
   )
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
@@ -43,15 +41,17 @@ export function Settings() {
 
   const saveGreetingName = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!supabase) return
+    if (!supabase || !user) return
     setIsSavingProfile(true)
     setProfileMessage(null)
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        data: { name: greetingName.trim() },
-      })
+      const { error } = await supabase
+        .from('couple_members')
+        .update({ display_name: greetingName.trim() })
+        .eq('user_id', user.id)
       if (error) throw error
+      await refresh()
       setProfileMessage('Nombre del saludo actualizado.')
     } catch (error) {
       setProfileMessage(getErrorMessage(error))

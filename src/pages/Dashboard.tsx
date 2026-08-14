@@ -37,10 +37,10 @@ const collectionInfo: Record<
 
 export function Dashboard() {
   const { user } = useAuth()
-  const { couple } = useCouple()
+  const { couple, membership } = useCouple()
   const { items, isLoading, error, updateItem, deleteItem } = useItems()
   const [editingItem, setEditingItem] = useState<Item | null>(null)
-  const firstName = user?.user_metadata?.name ?? user?.email?.split('@')[0]
+  const firstName = membership?.display_name ?? user?.email?.split('@')[0]
   const pinnedItems = items.filter((item) => item.is_pinned).slice(0, 3)
   const recentItems = items.filter((item) => !item.is_pinned).slice(0, 6)
 
