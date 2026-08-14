@@ -1630,14 +1630,14 @@ code {
     left: 0;
     display: grid;
     height: 68px;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr)) 64px;
     padding: 6px max(9px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom));
     background: rgba(255, 253, 249, 0.96);
     border-top: 1px solid #e4dcd3;
     backdrop-filter: blur(16px);
   }
 
-  .mobile-nav a {
+  .mobile-nav > a {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1647,8 +1647,44 @@ code {
     font-size: 9px;
   }
 
-  .mobile-nav a.active {
+  .mobile-nav > a.active {
     color: var(--coral);
+  }
+
+  .mobile-nav > .quick-add {
+    z-index: 32;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-nav .quick-add-trigger {
+    width: 54px;
+    min-width: 54px;
+    height: 54px;
+    min-height: 54px;
+    padding: 0;
+    border: 4px solid var(--surface);
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(204, 73, 50, 0.38);
+    transform: translateY(-10px);
+  }
+
+  .mobile-nav .quick-add-trigger:hover:not(:disabled) {
+    transform: translateY(-11px);
+  }
+
+  .mobile-nav .quick-add-trigger span,
+  .mobile-nav .quick-add-chevron {
+    display: none;
+  }
+
+  .mobile-nav .quick-add-menu {
+    position: fixed;
+    top: auto;
+    right: 14px;
+    bottom: calc(78px + env(safe-area-inset-bottom));
+    width: min(284px, calc(100vw - 28px));
   }
 
   .page {
@@ -1664,33 +1700,8 @@ code {
     align-items: center;
   }
 
-  .dashboard-header .quick-add {
-    position: fixed;
-    z-index: 30;
-    right: 18px;
-    bottom: calc(82px + env(safe-area-inset-bottom));
-  }
-
-  .dashboard-header .quick-add-trigger {
-    width: 58px;
-    min-width: 58px;
-    height: 58px;
-    min-height: 58px;
-    padding: 0;
-    border-radius: 50%;
-    box-shadow: 0 12px 30px rgba(204, 73, 50, 0.36);
-  }
-
-  .dashboard-header .quick-add-trigger span,
-  .dashboard-header .quick-add-chevron {
+  .dashboard-header > .quick-add {
     display: none;
-  }
-
-  .dashboard-header .quick-add-menu {
-    top: auto;
-    right: 0;
-    bottom: 68px;
-    width: min(284px, calc(100vw - 36px));
   }
 
   .settings-grid {

@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useCouple } from '../contexts/CoupleContext'
 import { getInitials } from '../lib/format'
 import { Brand } from './Brand'
+import { QuickAddMenu } from './QuickAddMenu'
 
 const navigation = [
   { to: '/', label: 'Inicio', icon: Home, end: true },
@@ -85,6 +86,7 @@ export function AppShell() {
             <span>{label}</span>
           </NavLink>
         ))}
+        <QuickAddMenu />
       </nav>
     </div>
   )
