@@ -35,6 +35,12 @@ export function QuickAddMenu() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!open) return
+    document.body.classList.add('quick-add-open')
+    return () => document.body.classList.remove('quick-add-open')
+  }, [open])
+
   return (
     <div className={`quick-add ${open ? 'open' : ''}`} ref={containerRef}>
       <button
@@ -44,26 +50,29 @@ export function QuickAddMenu() {
         onClick={() => setOpen((current) => !current)}
         type="button"
       >
-        <Plus size={19} />
+        <Plus className="quick-add-plus" size={19} />
         <span>{t('quickAdd.button')}</span>
         <ChevronDown className="quick-add-chevron" size={15} />
       </button>
 
       {open && (
-        <div aria-label={t('quickAdd.label')} className="quick-add-menu" role="menu">
-          <p>{t('quickAdd.question')}</p>
-          {options.map(({ to, label, description, icon: Icon, className }) => (
-            <Link key={to} onClick={() => setOpen(false)} role="menuitem" to={to}>
-              <span className={`quick-add-option-icon ${className}`}>
-                <Icon size={18} strokeWidth={1.8} />
-              </span>
-              <span>
-                <strong>{label}</strong>
-                <small>{description}</small>
-              </span>
-            </Link>
-          ))}
-        </div>
+        <>
+          <button aria-label={t('common.close')} className="quick-add-backdrop" onClick={() => setOpen(false)} type="button" />
+          <div aria-label={t('quickAdd.label')} className="quick-add-menu" role="menu">
+            <p>{t('quickAdd.question')}</p>
+            {options.map(({ to, label, description, icon: Icon, className }) => (
+              <Link key={to} onClick={() => setOpen(false)} role="menuitem" to={to}>
+                <span className={`quick-add-option-icon ${className}`}>
+                  <Icon size={18} strokeWidth={1.8} />
+                </span>
+                <span>
+                  <strong>{label}</strong>
+                  <small>{description}</small>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )

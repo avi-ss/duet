@@ -26,6 +26,8 @@ const es = {
   'nav.mobileLabel': 'Navegación móvil',
   'nav.goHome': 'Ir al inicio de Duet',
   'nav.signOut': 'Cerrar sesión',
+  'nav.collapse': 'Ocultar navegación',
+  'nav.expand': 'Mostrar navegación',
   'space.label': 'Vuestro espacio',
   'quickAdd.button': 'Añadir algo',
   'quickAdd.label': 'Qué quieres añadir',
@@ -212,7 +214,7 @@ const es = {
 
 const en: Record<keyof typeof es, string> = {
   'common.cancel': 'Cancel', 'common.close': 'Close', 'common.optional': 'optional', 'common.save': 'Save', 'common.saveChanges': 'Save changes', 'common.loading': 'Loading Duet…', 'common.retry': 'Try again',
-  'nav.home': 'Home', 'nav.wishlist': 'Wishlist', 'nav.notes': 'Notes', 'nav.links': 'Links', 'nav.settings': 'Settings', 'nav.mainLabel': 'Main navigation', 'nav.mobileLabel': 'Mobile navigation', 'nav.goHome': 'Go to Duet home', 'nav.signOut': 'Sign out',
+  'nav.home': 'Home', 'nav.wishlist': 'Wishlist', 'nav.notes': 'Notes', 'nav.links': 'Links', 'nav.settings': 'Settings', 'nav.mainLabel': 'Main navigation', 'nav.mobileLabel': 'Mobile navigation', 'nav.goHome': 'Go to Duet home', 'nav.signOut': 'Sign out', 'nav.collapse': 'Collapse navigation', 'nav.expand': 'Expand navigation',
   'space.label': 'Your space',
   'quickAdd.button': 'Add something', 'quickAdd.label': 'Choose what to add', 'quickAdd.question': 'What would you like to save?', 'quickAdd.wish': 'A wish', 'quickAdd.wishDescription': 'Something to look forward to', 'quickAdd.note': 'A note', 'quickAdd.noteDescription': 'An idea or reminder', 'quickAdd.link': 'A link', 'quickAdd.linkDescription': 'A place worth saving',
   'modal.eyebrow': 'Add to your space', 'modal.editDescription': 'Change anything you need and save it again.',

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  Bookmark,
   ExternalLink,
   Link2,
   MoreHorizontal,
@@ -75,12 +76,17 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
       className={`item-card item-card-${item.type} ${item.is_pinned ? 'is-pinned' : ''}`}
       data-member-color={creator?.profile_color ?? 'coral'}
     >
+      {item.is_pinned && (
+        <span className="pin-marker" title={t('item.pinned')}>
+          <Bookmark fill="currentColor" size={15} />
+          <span className="sr-only">{t('item.pinned')}</span>
+        </span>
+      )}
       <div className="item-card-top">
         <div className="item-card-labels">
           <span className="item-icon" aria-hidden="true">
             <Icon size={18} strokeWidth={1.8} />
           </span>
-          {item.is_pinned && <span className="pinned-badge"><Pin size={11} fill="currentColor" /> {t('item.pinned')}</span>}
         </div>
         <div className="item-menu-wrap">
           <button
