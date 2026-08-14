@@ -3,6 +3,8 @@ import { Pin, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { ItemForm } from '../components/ItemForm'
+import { ItemPreview } from '../components/ItemPreview'
+import { MobileGridToggle } from '../components/MobileGridToggle'
 import { Modal } from '../components/Modal'
 import { QuickAddMenu } from '../components/QuickAddMenu'
 import { useAuth } from '../contexts/AuthContext'
@@ -10,6 +12,7 @@ import { useCouple } from '../contexts/CoupleContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import { useDelayedLoading } from '../hooks/useDelayedLoading'
 import { useItems } from '../hooks/useItems'
+import { useGridPreference } from '../hooks/useGridPreference'
 import { getGreeting } from '../lib/format'
 import type { Item, ItemType } from '../types/database'
 
@@ -20,6 +23,8 @@ export function Dashboard() {
   const { items, isLoading, error, updateItem, deleteItem } = useItems()
   const showLoading = useDelayedLoading(isLoading)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
+  const [previewItem, setPreviewItem] = useState<Item | null>(null)
+  const { compact, toggleCompact } = useGridPreference()
   const firstName = membership?.display_name ?? user?.email?.split('@')[0]
   const pinnedItems = items.filter((item) => item.is_pinned).slice(0, 3)
   const recentItems = items.filter((item) => !item.is_pinned).slice(0, 6)
@@ -36,9 +41,11 @@ export function Dashboard() {
       key={item.id}
       onDelete={(current) => deleteItem(current.id)}
       onEdit={setEditingItem}
+      onPreview={setPreviewItem}
       onTogglePin={(current) =>
         updateItem(current.id, { is_pinned: !current.is_pinned })
       }
+      previewHref={`#/${item.type === 'wishlist' ? 'wishlist' : `${item.type}s`}?preview=${item.id}`}
     />
   )
 
@@ -50,7 +57,10 @@ export function Dashboard() {
           <h1>{getGreeting(language)}{firstName ? `, ${firstName}` : ''} <span>✦</span></h1>
           <p>{t('dashboard.subtitle')}</p>
         </div>
-        <QuickAddMenu />
+        <div className="dashboard-actions">
+          <MobileGridToggle compact={compact} onToggle={toggleCompact} />
+          <QuickAddMenu />
+        </div>
       </header>
 
       {error && <p className="inline-error">{t('collection.loadError', { error })}</p>}
@@ -63,7 +73,7 @@ export function Dashboard() {
               <h2>{t('dashboard.pinnedTitle')}</h2>
             </div>
           </div>
-          <div className="pinned-grid">{pinnedItems.map(renderItem)}</div>
+          <div className={`pinned-grid ${compact ? 'mobile-compact-grid' : ''}`}>{pinnedItems.map(renderItem)}</div>
         </section>
       )}
 
@@ -76,11 +86,11 @@ export function Dashboard() {
         </div>
 
         {showLoading ? (
-          <div className="card-skeleton-grid" aria-label={t('common.loading')}>
+          <div className={`card-skeleton-grid ${compact ? 'mobile-compact-grid' : ''}`} aria-label={t('common.loading')}>
             {[1, 2, 3].map((number) => <div className="card-skeleton" key={number} />)}
           </div>
         ) : isLoading ? null : recentItems.length > 0 ? (
-          <div className="recent-grid">
+          <div className={`recent-grid ${compact ? 'mobile-compact-grid' : ''}`}>
             {recentItems.map(renderItem)}
           </div>
         ) : items.length === 0 ? (
@@ -111,6 +121,16 @@ export function Dashboard() {
             submitLabel={t('common.saveChanges')}
             type={editingItem.type}
           />
+        </Modal>
+      )}
+
+      {previewItem && (
+        <Modal
+          eyebrow={t('item.previewEyebrow')}
+          onClose={() => setPreviewItem(null)}
+          title={previewItem.title}
+        >
+          <ItemPreview item={previewItem} />
         </Modal>
       )}
     </div>

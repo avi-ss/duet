@@ -40,8 +40,12 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   useLayoutEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)')
     const applyTheme = () => {
-      document.documentElement.dataset.theme =
-        mode === 'system' ? (media.matches ? 'dark' : 'light') : mode
+      const resolvedTheme = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode
+      document.documentElement.dataset.theme = resolvedTheme
+      document.querySelector('meta[name="theme-color"]')?.setAttribute(
+        'content',
+        resolvedTheme === 'dark' ? '#171411' : '#f8f5f0',
+      )
     }
 
     applyTheme()

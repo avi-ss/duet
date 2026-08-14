@@ -21,8 +21,10 @@ import { ProfileAvatar } from './ProfileAvatar'
 type ItemCardProps = {
   item: Item
   onEdit?: (item: Item) => void
+  onPreview?: (item: Item) => void
   onTogglePin?: (item: Item) => Promise<void>
   onDelete: (item: Item) => Promise<void>
+  previewHref?: string
 }
 
 const iconByType = {
@@ -31,7 +33,7 @@ const iconByType = {
   link: Link2,
 }
 
-export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps) {
+export function ItemCard({ item, onEdit, onPreview, onTogglePin, onDelete, previewHref }: ItemCardProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isPinning, setIsPinning] = useState(false)
@@ -44,6 +46,7 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
     creator?.user_id === membership?.user_id
       ? t('item.you')
       : creator?.display_name ?? t('item.partner')
+  const typeLabel = t(`collection.${item.type}.singular`)
 
   const handleDelete = async () => {
     if (!window.confirm(t('item.deleteConfirm', { title: item.title }))) return
@@ -76,6 +79,17 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
       className={`item-card item-card-${item.type} ${item.is_pinned ? 'is-pinned' : ''}`}
       data-member-color={creator?.profile_color ?? 'coral'}
     >
+      {onPreview && previewHref && (
+        <a
+          aria-label={t('item.preview', { title: item.title })}
+          className="item-card-hitarea"
+          href={previewHref}
+          onClick={(event) => {
+            event.preventDefault()
+            onPreview(item)
+          }}
+        />
+      )}
       {item.is_pinned && (
         <span className="pin-marker" title={t('item.pinned')}>
           <Bookmark fill="currentColor" size={15} />
@@ -87,6 +101,7 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
           <span className="item-icon" aria-hidden="true">
             <Icon size={18} strokeWidth={1.8} />
           </span>
+          <span className="item-kind">{typeLabel}</span>
         </div>
         <div className="item-menu-wrap">
           <button
