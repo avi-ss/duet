@@ -6,10 +6,11 @@ import { useLanguage } from '../contexts/LanguageContext'
 type ModalProps = PropsWithChildren<{
   title: string
   description?: string
+  eyebrow?: string
   onClose: () => void
 }>
 
-export function Modal({ title, description, onClose, children }: ModalProps) {
+export function Modal({ title, description, eyebrow, onClose, children }: ModalProps) {
   const { t } = useLanguage()
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -35,7 +36,7 @@ export function Modal({ title, description, onClose, children }: ModalProps) {
       >
         <div className="modal-header">
           <div>
-            <p className="eyebrow">{t('modal.eyebrow')}</p>
+            <p className="eyebrow">{eyebrow ?? t('modal.eyebrow')}</p>
             <h2 id="modal-title">{title}</h2>
             {description && <p>{description}</p>}
           </div>

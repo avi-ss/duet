@@ -13,8 +13,11 @@ import {
   ShieldCheck,
   Sun,
   Trash2,
+  UserMinus,
   UserRound,
+  UsersRound,
 } from 'lucide-react'
+import { Modal } from '../components/Modal'
 import { ProfileAvatar } from '../components/ProfileAvatar'
 import { useAuth } from '../contexts/AuthContext'
 import { useCouple } from '../contexts/CoupleContext'
@@ -26,7 +29,7 @@ import {
 } from '../contexts/ThemeContext'
 import { getErrorMessage } from '../lib/errors'
 import { supabase } from '../lib/supabase'
-import type { ProfileColor } from '../types/database'
+import type { CoupleMember, ProfileColor } from '../types/database'
 
 const profileColors: ProfileColor[] = ['coral', 'sage', 'blue', 'plum', 'amber', 'rose']
 
@@ -62,6 +65,9 @@ export function Settings() {
   const [spaceMessage, setSpaceMessage] = useState<string | null>(null)
   const [profileMessage, setProfileMessage] = useState<string | null>(null)
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
+  const [memberMessage, setMemberMessage] = useState<string | null>(null)
+  const [memberToRemove, setMemberToRemove] = useState<CoupleMember | null>(null)
+  const [isRemovingMember, setIsRemovingMember] = useState(false)
   const otherMemberColor = members.find(
     (member) => member.user_id !== user?.id,
   )?.profile_color
@@ -220,6 +226,25 @@ export function Settings() {
     window.setTimeout(() => setCopied(false), 1800)
   }
 
+  const removeMember = async () => {
+    if (!supabase || !memberToRemove) return
+    setIsRemovingMember(true)
+    setMemberMessage(null)
+    try {
+      const { error } = await supabase.rpc('remove_couple_member', {
+        target_member_id: memberToRemove.user_id,
+      })
+      if (error) throw error
+      setMemberToRemove(null)
+      await refresh()
+      setMemberMessage(t('settings.memberRemoved'))
+    } catch (error) {
+      setMemberMessage(getErrorMessage(error))
+    } finally {
+      setIsRemovingMember(false)
+    }
+  }
+
   return (
     <div className="page settings-page">
       <header className="page-header">
@@ -341,7 +366,35 @@ export function Settings() {
             <strong>{couple?.invite_code}</strong>
             <button aria-label={t('settings.copyCode')} className="icon-button" onClick={() => void copyCode()} type="button">{copied ? <Check size={18} /> : <Copy size={18} />}</button>
           </div>
-          <p className="muted-copy">{t('settings.inviteHelp')}</p>
+          <p className="muted-copy">{members.length >= 2 ? t('settings.spaceFull') : t('settings.inviteHelp')}</p>
+        </section>
+
+        <section className="settings-card members-card">
+          <div className="settings-card-heading">
+            <span><UsersRound size={20} /></span>
+            <div><h2>{t('settings.membersTitle')}</h2><p>{t('settings.membersDescription', { count: members.length })}</p></div>
+          </div>
+          <div className="members-list">
+            {members.map((member) => {
+              const isCurrentUser = member.user_id === user?.id
+              const memberName = member.display_name ?? (isCurrentUser ? user?.email?.split('@')[0] : t('settings.unnamedMember'))
+              return (
+                <div className="member-row" data-member-color={member.profile_color} key={member.user_id}>
+                  <ProfileAvatar member={member} name={memberName} size={42} url={avatarUrls[member.user_id]} />
+                  <div className="member-details">
+                    <strong>{memberName}{isCurrentUser && <small>{t('settings.you')}</small>}</strong>
+                    <span>{member.role === 'owner' ? t('settings.owner') : t('settings.member')}</span>
+                  </div>
+                  {membership?.role === 'owner' && !isCurrentUser && (
+                    <button aria-label={t('settings.removeMember')} className="icon-button member-remove-button" onClick={() => setMemberToRemove(member)} title={t('settings.removeMember')} type="button">
+                      <UserMinus size={17} />
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          {memberMessage && <p className="settings-message">{memberMessage}</p>}
         </section>
 
         <section className="settings-card password-settings-card">
@@ -366,6 +419,22 @@ export function Settings() {
           <button className="button button-ghost danger-text" onClick={() => void signOut()} type="button"><LogOut size={16} /> {t('nav.signOut')}</button>
         </section>
       </div>
+
+      {memberToRemove && (
+        <Modal
+          description={t('settings.removeMemberDescription', { name: memberToRemove.display_name ?? t('settings.unnamedMember') })}
+          eyebrow={t('settings.manageMembers')}
+          onClose={() => !isRemovingMember && setMemberToRemove(null)}
+          title={t('settings.removeMemberTitle')}
+        >
+          <div className="modal-actions">
+            <button className="button button-ghost" disabled={isRemovingMember} onClick={() => setMemberToRemove(null)} type="button">{t('common.cancel')}</button>
+            <button className="button button-danger" disabled={isRemovingMember} onClick={() => void removeMember()} type="button">
+              <UserMinus size={16} /> {isRemovingMember ? t('settings.removingMember') : t('settings.confirmRemoveMember')}
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

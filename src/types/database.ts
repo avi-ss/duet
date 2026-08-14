@@ -126,6 +126,10 @@ export type Database = {
         Args: { code: string }
         Returns: string
       }
+      remove_couple_member: {
+        Args: { target_member_id: string }
+        Returns: string
+      }
     }
     Enums: {
       item_type: ItemType

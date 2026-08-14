@@ -115,7 +115,7 @@ export function CoupleProvider({ children }: PropsWithChildren) {
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
           table: 'couple_members',
           filter: `couple_id=eq.${coupleId}`,

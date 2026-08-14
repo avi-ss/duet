@@ -70,7 +70,8 @@ export function AppShell() {
 
         <div className="sidebar-bottom">
           <NavLink className="settings-link" title={sidebarCollapsed ? t('nav.settings') : undefined} to="/settings">
-            <Settings size={18} /> {t('nav.settings')}
+            <Settings size={18} />
+            <span>{t('nav.settings')}</span>
           </NavLink>
           <div className="user-chip" title={sidebarCollapsed ? membership?.display_name ?? user?.email : undefined}>
             <ProfileAvatar

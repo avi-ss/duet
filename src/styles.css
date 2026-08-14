@@ -20,6 +20,9 @@
   --sky-soft: #e1edf0;
   --yellow: #e8ae51;
   --yellow-soft: #fff0cb;
+  --danger: #b94b3d;
+  --danger-strong: #9f392e;
+  --danger-soft: #f6e5e2;
   --shadow: 0 16px 45px rgba(65, 51, 39, 0.09);
   color-scheme: light;
 }
@@ -62,6 +65,9 @@
   --sage-soft: rgba(119, 139, 117, 0.18);
   --sky-soft: rgba(98, 136, 153, 0.18);
   --yellow-soft: rgba(232, 174, 81, 0.16);
+  --danger: #dc7568;
+  --danger-strong: #eb8b7f;
+  --danger-soft: rgba(185, 75, 61, 0.17);
   --shadow: 0 16px 45px rgba(0, 0, 0, 0.28);
 }
 
@@ -235,6 +241,17 @@ h2 {
   color: var(--muted);
   background: transparent;
   border-color: var(--line);
+}
+
+.button-danger {
+  color: #fff;
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.button-danger:hover:not(:disabled) {
+  background: var(--danger-strong);
+  border-color: var(--danger-strong);
 }
 
 .icon-button {
@@ -593,8 +610,8 @@ textarea:focus {
 
 .sidebar-toggle {
   position: absolute;
-  top: 34px;
-  right: -16px;
+  top: 30px;
+  right: -32px;
   display: grid;
   width: 32px;
   height: 38px;
@@ -606,13 +623,13 @@ textarea:focus {
   box-shadow: 5px 5px 15px rgba(70, 55, 42, 0.08);
   cursor: pointer;
   place-items: center;
-  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+  transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
 }
 
 .sidebar-toggle:hover {
   color: var(--coral-dark);
-  background: var(--surface);
-  transform: translateX(2px);
+  background: color-mix(in srgb, var(--coral-soft) 72%, var(--surface));
+  border-color: color-mix(in srgb, var(--coral) 46%, var(--line));
 }
 
 .sidebar > .brand {
@@ -786,6 +803,7 @@ textarea:focus {
 }
 
 .sidebar[data-collapsed='true'] > .brand {
+  align-self: center;
   justify-content: center;
   margin-left: 0;
 }
@@ -797,9 +815,10 @@ textarea:focus {
 
 .sidebar[data-collapsed='true'] .couple-badge div,
 .sidebar[data-collapsed='true'] .main-nav a span,
-.sidebar[data-collapsed='true'] .settings-link:not(.active) span,
-.sidebar[data-collapsed='true'] .settings-link {
-  font-size: 0;
+.sidebar[data-collapsed='true'] .settings-link span,
+.sidebar[data-collapsed='true'] .user-chip > div,
+.sidebar[data-collapsed='true'] .user-chip > button {
+  display: none;
 }
 
 .sidebar[data-collapsed='true'] .main-nav a,
@@ -812,11 +831,6 @@ textarea:focus {
 .sidebar[data-collapsed='true'] .user-chip {
   justify-content: center;
   padding-inline: 0;
-}
-
-.sidebar[data-collapsed='true'] .user-chip > div,
-.sidebar[data-collapsed='true'] .user-chip > button {
-  display: none;
 }
 
 .sidebar-is-collapsed .main-content {
@@ -1131,7 +1145,7 @@ textarea:focus {
   position: absolute;
   z-index: 4;
   top: -1px;
-  right: 56px;
+  right: 68px;
   display: grid;
   width: 32px;
   height: 41px;
@@ -1288,7 +1302,7 @@ textarea:focus {
 
 .item-menu .danger,
 .danger-text {
-  color: #b53d2d;
+  color: var(--danger);
 }
 
 .add-card {
@@ -1902,6 +1916,77 @@ code {
   line-height: 1.5;
 }
 
+.members-list {
+  display: grid;
+  gap: 9px;
+}
+
+.member-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 11px;
+  background: color-mix(in srgb, var(--member-soft) 42%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--member-border) 65%, var(--line));
+  border-radius: 13px;
+}
+
+.member-details {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 3px;
+}
+
+.member-details strong {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.member-details strong small {
+  padding: 2px 6px;
+  color: var(--member-color);
+  background: var(--member-soft);
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.member-details > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.member-remove-button {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+}
+
+.member-remove-button:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--line));
+}
+
+.members-card .settings-message {
+  margin-top: 11px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .account-meta {
   display: flex;
   justify-content: space-between;
@@ -1968,6 +2053,12 @@ code {
   color: var(--muted);
   background: #211e1b;
   border-color: var(--line);
+}
+
+:root[data-theme='dark'] .sidebar-toggle:hover {
+  color: var(--coral-dark);
+  background: color-mix(in srgb, var(--coral-soft) 72%, var(--surface));
+  border-color: color-mix(in srgb, var(--coral) 54%, var(--line));
 }
 
 :root[data-theme='dark'] .couple-badge,
