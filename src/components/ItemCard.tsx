@@ -13,6 +13,8 @@ import {
 import { getErrorMessage } from '../lib/errors'
 import { formatDate, getSafeUrl } from '../lib/format'
 import type { Item } from '../types/database'
+import { useCouple } from '../contexts/CoupleContext'
+import { ProfileAvatar } from './ProfileAvatar'
 
 type ItemCardProps = {
   item: Item
@@ -31,8 +33,14 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
   const [menuOpen, setMenuOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isPinning, setIsPinning] = useState(false)
+  const { avatarUrls, members, membership } = useCouple()
   const Icon = iconByType[item.type]
   const safeUrl = getSafeUrl(item.url)
+  const creator = members.find((member) => member.user_id === item.created_by)
+  const creatorName =
+    creator?.user_id === membership?.user_id
+      ? 'Tú'
+      : creator?.display_name ?? 'Tu pareja'
 
   const handleDelete = async () => {
     if (!window.confirm(`¿Eliminar “${item.title}”?`)) return
@@ -61,7 +69,10 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
   }
 
   return (
-    <article className={`item-card item-card-${item.type} ${item.is_pinned ? 'is-pinned' : ''}`}>
+    <article
+      className={`item-card item-card-${item.type} ${item.is_pinned ? 'is-pinned' : ''}`}
+      data-member-color={creator?.profile_color ?? 'coral'}
+    >
       <div className="item-card-top">
         <div className="item-card-labels">
           <span className="item-icon" aria-hidden="true">
@@ -109,6 +120,15 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
         {item.description && <p>{item.description}</p>}
       </div>
       <div className="item-card-footer">
+        <span className="item-creator">
+          <ProfileAvatar
+            member={creator}
+            name={creatorName}
+            size={23}
+            url={creator ? avatarUrls[creator.user_id] : undefined}
+          />
+          <span>{creatorName}</span>
+        </span>
         <time dateTime={item.created_at}>{formatDate(item.created_at)}</time>
         {safeUrl && (
           <a href={safeUrl} rel="noreferrer" target="_blank">

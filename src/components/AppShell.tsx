@@ -10,8 +10,8 @@ import {
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCouple } from '../contexts/CoupleContext'
-import { getInitials } from '../lib/format'
 import { Brand } from './Brand'
+import { ProfileAvatar } from './ProfileAvatar'
 import { QuickAddMenu } from './QuickAddMenu'
 
 const navigation = [
@@ -23,7 +23,7 @@ const navigation = [
 
 export function AppShell() {
   const { user, signOut } = useAuth()
-  const { couple, membership } = useCouple()
+  const { avatarUrls, couple, membership } = useCouple()
 
   return (
     <div className="app-shell">
@@ -52,7 +52,12 @@ export function AppShell() {
             <Settings size={18} /> Ajustes
           </NavLink>
           <div className="user-chip">
-            <span className="avatar">{getInitials(membership?.display_name ?? user?.email)}</span>
+            <ProfileAvatar
+              member={membership}
+              name={user?.email}
+              size={34}
+              url={membership ? avatarUrls[membership.user_id] : undefined}
+            />
             <div>
               <strong>{membership?.display_name ?? user?.email?.split('@')[0]}</strong>
               <small>{user?.email}</small>

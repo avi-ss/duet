@@ -12,6 +12,8 @@ export function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isRecovering, setIsRecovering] = useState(false)
+  const [recoverySent, setRecoverySent] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   if (isLoading) return <LoadingScreen />
@@ -23,7 +25,6 @@ export function Login() {
 
     setIsSubmitting(true)
     setError(null)
-
     try {
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -36,6 +37,36 @@ export function Login() {
     }
   }
 
+  const handleRecovery = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!supabase) return
+
+    setIsSubmitting(true)
+    setError(null)
+    try {
+      const redirectTo = new URL(
+        import.meta.env.BASE_URL,
+        window.location.origin,
+      ).toString()
+      const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        { redirectTo },
+      )
+      if (recoveryError) throw recoveryError
+      setRecoverySent(true)
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const toggleRecovery = () => {
+    setIsRecovering((current) => !current)
+    setError(null)
+    setRecoverySent(false)
+  }
+
   return (
     <main className="auth-page">
       <section className="auth-story">
@@ -46,9 +77,7 @@ export function Login() {
         <div className="story-copy">
           <span className="story-kicker"><Sparkles size={15} /> Solo para vosotros</span>
           <h1>Todo lo vuestro,<br /><em>en un mismo lugar.</em></h1>
-          <p>
-            Ideas, detalles, planes y pequeñas cosas que merece la pena guardar.
-          </p>
+          <p>Ideas, detalles, planes y pequeñas cosas que merece la pena guardar.</p>
         </div>
 
         <div className="story-cards" aria-hidden="true">
@@ -69,40 +98,36 @@ export function Login() {
         <div className="auth-box">
           <div className="mobile-auth-brand"><Brand /></div>
           <span className="auth-icon"><LockKeyhole size={22} /></span>
-          <p className="eyebrow">Bienvenidos de nuevo</p>
-          <h2>Entrad en vuestro espacio</h2>
-          <p className="auth-subtitle">Un lugar privado para todo lo que compartís.</p>
+          <p className="eyebrow">{isRecovering ? 'Recuperar acceso' : 'Bienvenidos de nuevo'}</p>
+          <h2>{isRecovering ? 'Recupera tu contraseña' : 'Entrad en vuestro espacio'}</h2>
+          <p className="auth-subtitle">
+            {isRecovering
+              ? 'Te enviaremos un enlace para elegir una contraseña nueva.'
+              : 'Un lugar privado para todo lo que compartís.'}
+          </p>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={isRecovering ? handleRecovery : handleSubmit}>
             <label>
               <span>Email</span>
-              <input
-                autoComplete="email"
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="vosotros@ejemplo.com"
-                required
-                type="email"
-                value={email}
-              />
+              <input autoComplete="email" onChange={(event) => setEmail(event.target.value)} placeholder="vosotros@ejemplo.com" required type="email" value={email} />
             </label>
-            <label>
-              <span>Contraseña</span>
-              <input
-                autoComplete="current-password"
-                minLength={6}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="••••••••••"
-                required
-                type="password"
-                value={password}
-              />
-            </label>
+
+            {!isRecovering && (
+              <label>
+                <span>Contraseña</span>
+                <input autoComplete="current-password" minLength={6} onChange={(event) => setPassword(event.target.value)} placeholder="••••••••••" required type="password" value={password} />
+              </label>
+            )}
 
             {error && <p className="form-error">{error}</p>}
+            {recoverySent && <p className="form-success">Revisa tu correo. El enlace puede tardar unos minutos.</p>}
 
-            <button className="button button-primary auth-submit" disabled={isSubmitting}>
+            <button className="button button-primary auth-submit" disabled={isSubmitting || recoverySent}>
               {isSubmitting && <LoaderCircle className="spin" size={18} />}
-              Entrar en Duet
+              {isRecovering ? 'Enviar enlace' : 'Entrar en Duet'}
+            </button>
+            <button className="auth-switch" onClick={toggleRecovery} type="button">
+              {isRecovering ? 'Volver al inicio de sesión' : 'He olvidado mi contraseña'}
             </button>
           </form>
 

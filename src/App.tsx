@@ -7,6 +7,7 @@ import { Collection } from './pages/Collection'
 import { Dashboard } from './pages/Dashboard'
 import { Login } from './pages/Login'
 import { Onboarding } from './pages/Onboarding'
+import { PasswordReset } from './pages/PasswordReset'
 import { Settings } from './pages/Settings'
 
 function CoupleGate() {
@@ -41,6 +42,10 @@ function ProtectedApp() {
 }
 
 export default function App() {
+  const { isPasswordRecovery } = useAuth()
+
+  if (isPasswordRecovery) return <PasswordReset />
+
   return (
     <Routes>
       <Route element={<Login />} path="/login" />

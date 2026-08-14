@@ -8,6 +8,7 @@ export type Json =
 
 export type ItemType = 'wishlist' | 'note' | 'link'
 export type MemberRole = 'owner' | 'member'
+export type ProfileColor = 'coral' | 'sage' | 'blue' | 'plum' | 'amber' | 'rose'
 
 export type Database = {
   public: {
@@ -32,21 +33,27 @@ export type Database = {
       }
       couple_members: {
         Row: {
+          avatar_path: string | null
           couple_id: string
           display_name: string | null
           joined_at: string
+          profile_color: ProfileColor
           role: MemberRole
           user_id: string
         }
         Insert: {
+          avatar_path?: string | null
           couple_id: string
           display_name?: string | null
           joined_at?: string
+          profile_color?: ProfileColor
           role?: MemberRole
           user_id: string
         }
         Update: {
+          avatar_path?: string | null
           display_name?: string | null
+          profile_color?: ProfileColor
           role?: MemberRole
         }
         Relationships: [

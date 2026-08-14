@@ -10,7 +10,9 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
 type AuthContextValue = {
+  completePasswordRecovery: () => void
   isLoading: boolean
+  isPasswordRecovery: boolean
   session: Session | null
   user: User | null
   signOut: () => Promise<void>
@@ -21,6 +23,9 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 export function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(Boolean(supabase))
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(() =>
+    window.location.hash.includes('type=recovery'),
+  )
 
   useEffect(() => {
     if (!supabase) return
@@ -35,9 +40,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession)
       setIsLoading(false)
+      if (event === 'PASSWORD_RECOVERY') setIsPasswordRecovery(true)
     })
 
     return () => {
@@ -48,7 +54,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const value = useMemo<AuthContextValue>(
     () => ({
+      completePasswordRecovery: () => setIsPasswordRecovery(false),
       isLoading,
+      isPasswordRecovery,
       session,
       user: session?.user ?? null,
       signOut: async () => {
@@ -57,7 +65,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         if (error) throw error
       },
     }),
-    [isLoading, session],
+    [isLoading, isPasswordRecovery, session],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

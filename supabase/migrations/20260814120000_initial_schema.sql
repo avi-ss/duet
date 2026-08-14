@@ -35,10 +35,17 @@ create table public.couple_members (
   display_name text check (
     display_name is null or char_length(trim(display_name)) between 1 and 50
   ),
+  avatar_path text,
+  profile_color text not null default 'coral' check (
+    profile_color in ('coral', 'sage', 'blue', 'plum', 'amber', 'rose')
+  ),
   joined_at timestamptz not null default now(),
   primary key (couple_id, user_id),
   unique (user_id)
 );
+
+create unique index couple_members_couple_profile_color_idx
+  on public.couple_members (couple_id, profile_color);
 
 create table public.items (
   id uuid primary key default gen_random_uuid(),
@@ -137,8 +144,8 @@ begin
   values (trim(couple_name))
   returning id into new_couple_id;
 
-  insert into public.couple_members (couple_id, user_id, role)
-  values (new_couple_id, auth.uid(), 'owner');
+  insert into public.couple_members (couple_id, user_id, role, profile_color)
+  values (new_couple_id, auth.uid(), 'owner', 'coral');
 
   return new_couple_id;
 end;
@@ -177,8 +184,8 @@ begin
     raise exception 'Este espacio ya tiene dos miembros.';
   end if;
 
-  insert into public.couple_members (couple_id, user_id, role)
-  values (target_couple_id, auth.uid(), 'member');
+  insert into public.couple_members (couple_id, user_id, role, profile_color)
+  values (target_couple_id, auth.uid(), 'member', 'sage');
 
   return target_couple_id;
 end;
@@ -238,7 +245,8 @@ using (public.is_couple_member(couple_id));
 revoke all on public.couples, public.couple_members, public.items from anon, authenticated;
 grant select on public.couples, public.couple_members, public.items to authenticated;
 grant update (name) on public.couples to authenticated;
-grant update (display_name) on public.couple_members to authenticated;
+grant update (display_name, avatar_path, profile_color)
+  on public.couple_members to authenticated;
 grant insert (couple_id, type, title, description, url, image_url, metadata)
   on public.items to authenticated;
 grant update (type, title, description, url, image_url, is_pinned, metadata)
