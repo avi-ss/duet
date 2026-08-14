@@ -717,6 +717,100 @@ textarea:focus {
 }
 
 /* Dashboard */
+.dashboard-header {
+  align-items: center;
+}
+
+.quick-add {
+  position: relative;
+  z-index: 12;
+  flex: 0 0 auto;
+}
+
+.quick-add-trigger {
+  min-width: 156px;
+  white-space: nowrap;
+}
+
+.quick-add-chevron {
+  transition: transform 160ms ease;
+}
+
+.quick-add.open .quick-add-chevron {
+  transform: rotate(180deg);
+}
+
+.quick-add-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 284px;
+  padding: 9px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  box-shadow: 0 18px 46px rgba(52, 42, 35, 0.17);
+  animation: modalIn 150ms ease;
+}
+
+.quick-add-menu > p {
+  margin: 5px 8px 7px;
+  color: #9a9189;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.quick-add-menu a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px;
+  border-radius: 10px;
+}
+
+.quick-add-menu a:hover {
+  background: #f6f1eb;
+}
+
+.quick-add-menu a > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.quick-add-menu strong {
+  font-size: 12px;
+}
+
+.quick-add-menu small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.quick-add-option-icon {
+  display: flex;
+  width: 37px;
+  height: 37px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: var(--coral);
+  background: var(--coral-soft);
+  border-radius: 10px;
+}
+
+.quick-add-option-icon.note {
+  color: #a77527;
+  background: var(--yellow-soft);
+}
+
+.quick-add-option-icon.link {
+  color: var(--sky);
+  background: var(--sky-soft);
+}
+
 .collection-overview {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -829,11 +923,37 @@ textarea:focus {
 }
 
 .recent-grid,
+.pinned-grid,
 .collection-grid,
 .card-skeleton-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+}
+
+.pinned-section {
+  margin-bottom: 48px;
+}
+
+.dashboard-page > .inline-error {
+  margin-bottom: 22px;
+}
+
+.pinned-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.all-pinned-copy {
+  margin: 0;
+  padding: 18px;
+  color: var(--muted);
+  background: rgba(255, 253, 249, 0.65);
+  border: 1px dashed var(--line);
+  border-radius: 13px;
+  font-size: 12px;
+  text-align: center;
 }
 
 .welcome-empty,
@@ -896,6 +1016,31 @@ textarea:focus {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+}
+
+.item-card-labels {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pinned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 7px;
+  color: #9f503f;
+  background: #f9e8e2;
+  border-radius: 7px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.item-card.is-pinned {
+  border-color: #e7c8be;
+  box-shadow: inset 0 3px 0 rgba(229, 93, 67, 0.15);
 }
 
 .item-icon {
@@ -1320,6 +1465,12 @@ code {
   justify-self: start;
 }
 
+.profile-name-form {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
 .settings-message {
   margin: 0;
   color: var(--sage);
@@ -1402,6 +1553,7 @@ code {
 @media (max-width: 1050px) {
   .collection-overview,
   .recent-grid,
+  .pinned-grid,
   .collection-grid,
   .card-skeleton-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1508,6 +1660,39 @@ code {
     margin-bottom: 30px;
   }
 
+  .dashboard-header {
+    align-items: center;
+  }
+
+  .dashboard-header .quick-add {
+    position: fixed;
+    z-index: 30;
+    right: 18px;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+  }
+
+  .dashboard-header .quick-add-trigger {
+    width: 58px;
+    min-width: 58px;
+    height: 58px;
+    min-height: 58px;
+    padding: 0;
+    border-radius: 50%;
+    box-shadow: 0 12px 30px rgba(204, 73, 50, 0.36);
+  }
+
+  .dashboard-header .quick-add-trigger span,
+  .dashboard-header .quick-add-chevron {
+    display: none;
+  }
+
+  .dashboard-header .quick-add-menu {
+    top: auto;
+    right: 0;
+    bottom: 68px;
+    width: min(284px, calc(100vw - 36px));
+  }
+
   .settings-grid {
     grid-template-columns: 1fr;
   }
@@ -1538,12 +1723,9 @@ code {
     width: 100%;
   }
 
-  .dashboard-header .desktop-quick-add {
-    display: none;
-  }
-
   .collection-overview,
   .recent-grid,
+  .pinned-grid,
   .collection-grid,
   .card-skeleton-grid {
     grid-template-columns: 1fr;

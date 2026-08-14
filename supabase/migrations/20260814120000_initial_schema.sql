@@ -46,6 +46,7 @@ create table public.items (
   description text check (description is null or char_length(description) <= 1000),
   url text check (url is null or char_length(url) <= 2048),
   image_url text check (image_url is null or char_length(image_url) <= 2048),
+  is_pinned boolean not null default false,
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -230,7 +231,7 @@ grant select on public.couples, public.couple_members, public.items to authentic
 grant update (name) on public.couples to authenticated;
 grant insert (couple_id, type, title, description, url, image_url, metadata)
   on public.items to authenticated;
-grant update (type, title, description, url, image_url, metadata)
+grant update (type, title, description, url, image_url, is_pinned, metadata)
   on public.items to authenticated;
 grant delete on public.items to authenticated;
 

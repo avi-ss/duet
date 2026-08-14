@@ -11,7 +11,14 @@ export function Settings() {
   const [name, setName] = useState(couple?.name ?? '')
   const [copied, setCopied] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [greetingName, setGreetingName] = useState(
+    typeof user?.user_metadata?.name === 'string'
+      ? user.user_metadata.name
+      : user?.email?.split('@')[0] ?? '',
+  )
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [profileMessage, setProfileMessage] = useState<string | null>(null)
 
   const saveName = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -31,6 +38,25 @@ export function Settings() {
       setMessage(getErrorMessage(error))
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const saveGreetingName = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!supabase) return
+    setIsSavingProfile(true)
+    setProfileMessage(null)
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { name: greetingName.trim() },
+      })
+      if (error) throw error
+      setProfileMessage('Nombre del saludo actualizado.')
+    } catch (error) {
+      setProfileMessage(getErrorMessage(error))
+    } finally {
+      setIsSavingProfile(false)
     }
   }
 
@@ -89,6 +115,22 @@ export function Settings() {
             <span><UserRound size={20} /></span>
             <div><h2>Tu cuenta</h2><p>{user?.email}</p></div>
           </div>
+          <form className="profile-name-form" onSubmit={saveGreetingName}>
+            <label>
+              <span>Nombre para el saludo</span>
+              <input
+                maxLength={50}
+                onChange={(event) => setGreetingName(event.target.value)}
+                placeholder="Cómo quieres que te llamemos"
+                required
+                value={greetingName}
+              />
+            </label>
+            {profileMessage && <p className="settings-message">{profileMessage}</p>}
+            <button className="button button-secondary" disabled={isSavingProfile}>
+              <Save size={16} /> Actualizar nombre
+            </button>
+          </form>
           <div className="account-meta">
             <span>Rol</span><strong>{membership?.role === 'owner' ? 'Creador/a' : 'Miembro'}</strong>
           </div>

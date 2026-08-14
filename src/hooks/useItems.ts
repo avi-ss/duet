@@ -23,6 +23,7 @@ export function useItems(type?: ItemType, limit?: number) {
       .from('items')
       .select('*')
       .eq('couple_id', couple.id)
+      .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false })
 
     if (type) query = query.eq('type', type)

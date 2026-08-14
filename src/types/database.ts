@@ -64,6 +64,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          is_pinned: boolean
           metadata: Json
           title: string
           type: ItemType
@@ -77,6 +78,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_pinned?: boolean
           metadata?: Json
           title: string
           type: ItemType
@@ -86,6 +88,7 @@ export type Database = {
         Update: {
           description?: string | null
           image_url?: string | null
+          is_pinned?: boolean
           metadata?: Json
           title?: string
           type?: ItemType

@@ -106,6 +106,9 @@ export function Collection({ type }: CollectionProps) {
                 setEditingItem(current)
                 setModalOpen(true)
               }}
+              onTogglePin={(current) =>
+                updateItem(current.id, { is_pinned: !current.is_pinned })
+              }
             />
           ))}
           <button className="add-card" onClick={() => setModalOpen(true)} type="button">

@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  base: command === 'build' ? '/duet/' : '/',
+  // Preview runs in production mode and must use the same Pages base as build.
+  base: mode === 'development' ? '/' : '/duet/',
 }))

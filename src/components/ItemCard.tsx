@@ -4,6 +4,8 @@ import {
   Link2,
   MoreHorizontal,
   Pencil,
+  Pin,
+  PinOff,
   StickyNote,
   Trash2,
   WandSparkles,
@@ -15,6 +17,7 @@ import type { Item } from '../types/database'
 type ItemCardProps = {
   item: Item
   onEdit?: (item: Item) => void
+  onTogglePin?: (item: Item) => Promise<void>
   onDelete: (item: Item) => Promise<void>
 }
 
@@ -24,9 +27,10 @@ const iconByType = {
   link: Link2,
 }
 
-export function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
+export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isPinning, setIsPinning] = useState(false)
   const Icon = iconByType[item.type]
   const safeUrl = getSafeUrl(item.url)
 
@@ -43,12 +47,28 @@ export function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
     }
   }
 
+  const handleTogglePin = async () => {
+    if (!onTogglePin) return
+    setIsPinning(true)
+    try {
+      await onTogglePin(item)
+    } catch (error) {
+      window.alert(getErrorMessage(error))
+    } finally {
+      setIsPinning(false)
+      setMenuOpen(false)
+    }
+  }
+
   return (
-    <article className={`item-card item-card-${item.type}`}>
+    <article className={`item-card item-card-${item.type} ${item.is_pinned ? 'is-pinned' : ''}`}>
       <div className="item-card-top">
-        <span className="item-icon" aria-hidden="true">
-          <Icon size={18} strokeWidth={1.8} />
-        </span>
+        <div className="item-card-labels">
+          <span className="item-icon" aria-hidden="true">
+            <Icon size={18} strokeWidth={1.8} />
+          </span>
+          {item.is_pinned && <span className="pinned-badge"><Pin size={11} fill="currentColor" /> Fijado</span>}
+        </div>
         <div className="item-menu-wrap">
           <button
             aria-expanded={menuOpen}
@@ -61,8 +81,14 @@ export function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
           </button>
           {menuOpen && (
             <div className="item-menu">
+              {onTogglePin && (
+                <button disabled={isPinning} onClick={() => void handleTogglePin()} type="button">
+                  {item.is_pinned ? <PinOff size={15} /> : <Pin size={15} />}
+                  {item.is_pinned ? 'Desfijar' : 'Fijar'}
+                </button>
+              )}
               {onEdit && (
-                <button onClick={() => onEdit(item)} type="button">
+                <button onClick={() => { setMenuOpen(false); onEdit(item) }} type="button">
                   <Pencil size={15} /> Editar
                 </button>
               )}

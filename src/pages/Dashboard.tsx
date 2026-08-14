@@ -1,11 +1,15 @@
-import { ArrowRight, Link2, Plus, StickyNote, WandSparkles } from 'lucide-react'
+import { useState } from 'react'
+import { ArrowRight, Link2, Pin, Plus, StickyNote, WandSparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
+import { ItemForm } from '../components/ItemForm'
+import { Modal } from '../components/Modal'
+import { QuickAddMenu } from '../components/QuickAddMenu'
 import { useAuth } from '../contexts/AuthContext'
 import { useCouple } from '../contexts/CoupleContext'
 import { useItems } from '../hooks/useItems'
 import { getGreeting } from '../lib/format'
-import type { ItemType } from '../types/database'
+import type { Item, ItemType } from '../types/database'
 
 const collectionInfo: Record<
   ItemType,
@@ -34,8 +38,29 @@ const collectionInfo: Record<
 export function Dashboard() {
   const { user } = useAuth()
   const { couple } = useCouple()
-  const { items, isLoading, error, deleteItem } = useItems()
+  const { items, isLoading, error, updateItem, deleteItem } = useItems()
+  const [editingItem, setEditingItem] = useState<Item | null>(null)
   const firstName = user?.user_metadata?.name ?? user?.email?.split('@')[0]
+  const pinnedItems = items.filter((item) => item.is_pinned).slice(0, 3)
+  const recentItems = items.filter((item) => !item.is_pinned).slice(0, 6)
+
+  const itemLabel: Record<ItemType, string> = {
+    wishlist: 'deseo',
+    note: 'nota',
+    link: 'enlace',
+  }
+
+  const renderItem = (item: Item) => (
+    <ItemCard
+      item={item}
+      key={item.id}
+      onDelete={(current) => deleteItem(current.id)}
+      onEdit={setEditingItem}
+      onTogglePin={(current) =>
+        updateItem(current.id, { is_pinned: !current.is_pinned })
+      }
+    />
+  )
 
   return (
     <div className="page dashboard-page">
@@ -45,9 +70,7 @@ export function Dashboard() {
           <h1>{getGreeting()}{firstName ? `, ${firstName}` : ''} <span>✦</span></h1>
           <p>Aquí tenéis todo lo que estáis construyendo juntos.</p>
         </div>
-        <Link className="button button-primary desktop-quick-add" to="/deseos?crear=1">
-          <Plus size={18} /> Añadir algo
-        </Link>
+        <QuickAddMenu />
       </header>
 
       <section className="collection-overview" aria-label="Colecciones">
@@ -70,6 +93,20 @@ export function Dashboard() {
         })}
       </section>
 
+      {error && <p className="inline-error">No se pudo cargar el contenido: {error}</p>}
+
+      {!isLoading && pinnedItems.length > 0 && (
+        <section className="pinned-section">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow pinned-eyebrow"><Pin size={12} fill="currentColor" /> A mano</p>
+              <h2>Fijado para los dos</h2>
+            </div>
+          </div>
+          <div className="pinned-grid">{pinnedItems.map(renderItem)}</div>
+        </section>
+      )}
+
       <section className="recent-section">
         <div className="section-heading">
           <div>
@@ -78,31 +115,44 @@ export function Dashboard() {
           </div>
         </div>
 
-        {error && <p className="inline-error">No se pudo cargar el contenido: {error}</p>}
-
         {isLoading ? (
           <div className="card-skeleton-grid" aria-label="Cargando contenido">
             {[1, 2, 3].map((number) => <div className="card-skeleton" key={number} />)}
           </div>
-        ) : items.length > 0 ? (
+        ) : recentItems.length > 0 ? (
           <div className="recent-grid">
-            {items.slice(0, 6).map((item) => (
-              <ItemCard
-                item={item}
-                key={item.id}
-                onDelete={(current) => deleteItem(current.id)}
-              />
-            ))}
+            {recentItems.map(renderItem)}
           </div>
-        ) : (
+        ) : items.length === 0 ? (
           <div className="welcome-empty">
             <div className="empty-sparkles" aria-hidden="true">✦</div>
             <h3>Vuestro espacio empieza aquí</h3>
             <p>Guardad ese primer deseo, una nota bonita o el enlace de vuestro próximo plan.</p>
             <Link className="button button-primary" to="/deseos?crear=1"><Plus size={17} /> Añadir lo primero</Link>
           </div>
+        ) : (
+          <p className="all-pinned-copy">Todo lo que habéis guardado está fijado arriba.</p>
         )}
       </section>
+
+      {editingItem && (
+        <Modal
+          description="Cambia lo que necesites y vuelve a guardarlo."
+          onClose={() => setEditingItem(null)}
+          title={`Editar ${itemLabel[editingItem.type]}`}
+        >
+          <ItemForm
+            item={editingItem}
+            onCancel={() => setEditingItem(null)}
+            onSubmit={async (values) => {
+              await updateItem(editingItem.id, values)
+              setEditingItem(null)
+            }}
+            submitLabel="Guardar cambios"
+            type={editingItem.type}
+          />
+        </Modal>
+      )}
     </div>
   )
 }

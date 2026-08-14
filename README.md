@@ -1,96 +1,28 @@
 # Duet
 
-Una aplicación privada y compartida para guardar deseos, notas y enlaces. El frontend es una SPA en React desplegable en GitHub Pages; autenticación, datos, permisos y tiempo real viven en Supabase.
+Espacio privado y compartido para guardar deseos, notas y enlaces.
 
 ## Stack
 
-- React + TypeScript + Vite
-- React Router con `HashRouter`, compatible con GitHub Pages
-- Supabase Auth + PostgreSQL + Row Level Security + Realtime
-- Vitest + Testing Library
-- GitHub Actions para desplegar en Pages
+React, TypeScript, Vite y Supabase.
 
-## Puesta en marcha
-
-### 1. Instala y arranca
+## Desarrollo
 
 ```bash
 npm install
-cp .env.example .env.local
 npm run dev
 ```
 
-En PowerShell, el segundo comando es:
-
-```powershell
-Copy-Item .env.example .env.local
-```
-
-### 2. Crea el proyecto de Supabase
-
-1. Crea un proyecto desde el [dashboard de Supabase](https://supabase.com/dashboard).
-2. Abre **SQL Editor**, pega el contenido de [`supabase/migrations/20260814120000_initial_schema.sql`](supabase/migrations/20260814120000_initial_schema.sql) y ejecútalo.
-3. En **Project Settings → API**, copia la URL y la clave pública (`publishable` o la `anon` heredada) a `.env.local`:
-
-```dotenv
-VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
-VITE_SUPABASE_ANON_KEY=tu-clave-publica
-```
-
-La clave pública sí puede estar en el navegador. No pongas nunca una clave `secret` o `service_role` en variables que empiecen por `VITE_`.
-
-### 3. Crea las dos cuentas
-
-Como Duet no expone registro público, crea ambos usuarios desde **Authentication → Users → Add user**. Otra opción es activar el registro de forma temporal, crear las cuentas y volver a desactivarlo en **Authentication → Providers → Email → Allow new users to sign up**.
-
-La primera persona que entre crea el espacio. En **Ajustes** encontrará un código que la segunda persona puede usar al iniciar sesión.
+Las variables necesarias están documentadas en `.env.example`.
 
 ## Comandos
 
 ```bash
-npm run dev       # servidor local
-npm run lint      # análisis estático
-npm test          # tests una vez
-npm run test:watch
-npm run build     # tipos + build de producción
-npm run preview   # previsualiza dist/
+npm run dev      # Desarrollo
+npm run build    # Build de producción
+npm run preview  # Preview en /duet/
+npm run lint     # Lint
+npm test         # Tests
 ```
 
-## Despliegue en GitHub Pages
-
-El workflow [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) construye y publica automáticamente al hacer push a `master`.
-
-1. En GitHub, abre **Settings → Pages** y selecciona **GitHub Actions** como origen.
-2. En **Settings → Secrets and variables → Actions**, crea:
-   - variable `VITE_SUPABASE_URL`;
-   - secret `VITE_SUPABASE_ANON_KEY`.
-3. En Supabase, añade `https://avi-ss.github.io/duet/` a **Authentication → URL Configuration → Redirect URLs**.
-4. Haz push a `master` y espera a que termine el workflow.
-
-Vite usa `/duet/` como base de producción y las rutas tienen formato `/#/notas`, por lo que funcionan incluso al recargar una URL interna.
-
-## Seguridad
-
-El frontend de Pages es público, pero los datos no. Todas las tablas tienen RLS y las políticas verifican en PostgreSQL que `auth.uid()` pertenece al `couple_id` solicitado. Además:
-
-- cada cuenta solo puede pertenecer a un espacio;
-- cada espacio admite como máximo dos miembros mediante la función de unión;
-- el cliente autenticado solo recibe permisos para las columnas que necesita;
-- `created_by` y `couple_id` no pueden alterarse desde el navegador;
-- las funciones de onboarding usan `SECURITY DEFINER`, un `search_path` vacío y permisos explícitos.
-
-Antes de producción conviene mantener desactivado el registro público y activar MFA en las cuentas si vuestro plan de Supabase lo permite.
-
-## Estructura
-
-```text
-src/
-├── components/       UI reutilizable y layout
-├── contexts/         sesión y espacio compartido
-├── hooks/            consultas y suscripción realtime
-├── lib/              cliente Supabase y utilidades
-├── pages/            login, onboarding, colecciones y ajustes
-└── types/            tipos del esquema
-supabase/migrations/  esquema, funciones y políticas RLS
-.github/workflows/    despliegue a Pages
-```
+El frontend se despliega en GitHub Pages mediante GitHub Actions. El esquema y las migraciones de Supabase están en `supabase/migrations`.
