@@ -1331,10 +1331,16 @@ textarea:focus {
 .item-preview-footer {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 16px;
   padding-top: 17px;
   color: var(--muted);
   font-size: 11px;
+}
+
+.item-preview-footer time {
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 .add-card {
