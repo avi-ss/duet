@@ -3,7 +3,7 @@ import { Pin, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { ItemForm } from '../components/ItemForm'
-import { ItemPreview } from '../components/ItemPreview'
+import { ItemPreview, ItemPreviewAction, ItemPreviewTitle } from '../components/ItemPreview'
 import { MobileGridToggle } from '../components/MobileGridToggle'
 import { Modal } from '../components/Modal'
 import { QuickAddMenu } from '../components/QuickAddMenu'
@@ -127,8 +127,9 @@ export function Dashboard() {
       {previewItem && (
         <Modal
           eyebrow={t('item.previewEyebrow')}
+          headerAction={<ItemPreviewAction item={previewItem} />}
           onClose={() => setPreviewItem(null)}
-          title={previewItem.title}
+          title={<ItemPreviewTitle item={previewItem} />}
         >
           <ItemPreview item={previewItem} />
         </Modal>

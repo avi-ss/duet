@@ -76,7 +76,7 @@ export function ItemCard({ item, onEdit, onPreview, onTogglePin, onDelete, previ
 
   return (
     <article
-      className={`item-card item-card-${item.type} ${item.is_pinned ? 'is-pinned' : ''}`}
+      className={`item-card item-card-${item.type} ${item.is_pinned ? 'is-pinned' : ''} ${safeUrl ? 'has-external-link' : ''}`}
       data-member-color={creator?.profile_color ?? 'coral'}
     >
       {onPreview && previewHref && (
@@ -86,6 +86,7 @@ export function ItemCard({ item, onEdit, onPreview, onTogglePin, onDelete, previ
           href={previewHref}
           onClick={(event) => {
             event.preventDefault()
+            setMenuOpen(false)
             onPreview(item)
           }}
         />
@@ -98,16 +99,36 @@ export function ItemCard({ item, onEdit, onPreview, onTogglePin, onDelete, previ
       )}
       <div className="item-card-top">
         <div className="item-card-labels">
-          <span className="item-icon" aria-hidden="true">
+          <span aria-label={typeLabel} className="item-icon" role="img">
             <Icon size={18} strokeWidth={1.8} />
           </span>
-          <span className="item-kind">{typeLabel}</span>
+          <h3>{item.title}</h3>
         </div>
+        {safeUrl && (
+          <a className="item-card-open" href={safeUrl} rel="noreferrer" target="_blank">
+            {t('item.open')} <ExternalLink size={13} />
+          </a>
+        )}
+      </div>
+      <div className="item-card-content">
+        {item.description && <p>{item.description}</p>}
+      </div>
+      <div className="item-card-footer">
+        <span className="item-creator">
+          <ProfileAvatar
+            member={creator}
+            name={creatorName}
+            size={23}
+            url={creator ? avatarUrls[creator.user_id] : undefined}
+          />
+          <span>{creatorName}</span>
+        </span>
+        <time dateTime={item.created_at}>{formatDate(item.created_at, locale)}</time>
         <div className="item-menu-wrap">
           <button
             aria-expanded={menuOpen}
             aria-label={t('item.options', { title: item.title })}
-            className="icon-button small"
+            className="icon-button small item-menu-trigger"
             onClick={() => setMenuOpen((open) => !open)}
             type="button"
           >
@@ -137,27 +158,6 @@ export function ItemCard({ item, onEdit, onPreview, onTogglePin, onDelete, previ
             </div>
           )}
         </div>
-      </div>
-      <div className="item-card-content">
-        <h3>{item.title}</h3>
-        {item.description && <p>{item.description}</p>}
-      </div>
-      <div className="item-card-footer">
-        <span className="item-creator">
-          <ProfileAvatar
-            member={creator}
-            name={creatorName}
-            size={23}
-            url={creator ? avatarUrls[creator.user_id] : undefined}
-          />
-          <span>{creatorName}</span>
-        </span>
-        <time dateTime={item.created_at}>{formatDate(item.created_at, locale)}</time>
-        {safeUrl && (
-          <a href={safeUrl} rel="noreferrer" target="_blank">
-            {t('item.open')} <ExternalLink size={13} />
-          </a>
-        )}
       </div>
     </article>
   )

@@ -3,7 +3,7 @@ import { Link2, Plus, StickyNote, WandSparkles } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { ItemForm } from '../components/ItemForm'
-import { ItemPreview } from '../components/ItemPreview'
+import { ItemPreview, ItemPreviewAction, ItemPreviewTitle } from '../components/ItemPreview'
 import { MobileGridToggle } from '../components/MobileGridToggle'
 import { Modal } from '../components/Modal'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -141,7 +141,12 @@ export function Collection({ type }: CollectionProps) {
       )}
 
       {previewItem && (
-        <Modal eyebrow={t('item.previewEyebrow')} onClose={closePreview} title={previewItem.title}>
+        <Modal
+          eyebrow={t('item.previewEyebrow')}
+          headerAction={<ItemPreviewAction item={previewItem} />}
+          onClose={closePreview}
+          title={<ItemPreviewTitle item={previewItem} />}
+        >
           <ItemPreview item={previewItem} />
         </Modal>
       )}
