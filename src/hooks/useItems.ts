@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { getErrorMessage } from '../lib/errors'
 import { supabase } from '../lib/supabase'
 import type {
@@ -8,17 +8,20 @@ import type {
   ItemUpdate,
 } from '../types/database'
 import { useCouple } from '../contexts/CoupleContext'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export function useItems(type?: ItemType, limit?: number) {
   const { couple } = useCouple()
+  const { t } = useLanguage()
   const [items, setItems] = useState<Item[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const hasLoaded = useRef(false)
 
   const fetchItems = useCallback(async () => {
     if (!supabase || !couple) return
 
-    setIsLoading(true)
+    if (!hasLoaded.current) setIsLoading(true)
     let query = supabase
       .from('items')
       .select('*')
@@ -32,6 +35,7 @@ export function useItems(type?: ItemType, limit?: number) {
     const { data, error: queryError } = await query
     setItems(data ?? [])
     setError(queryError?.message ?? null)
+    hasLoaded.current = true
     setIsLoading(false)
   }, [couple, limit, type])
 
@@ -65,7 +69,7 @@ export function useItems(type?: ItemType, limit?: number) {
   const createItem = async (
     values: Omit<ItemInsert, 'couple_id' | 'created_by'>,
   ) => {
-    if (!supabase || !couple) throw new Error('No hay una pareja activa.')
+    if (!supabase || !couple) throw new Error(t('error.noCouple'))
 
     try {
       const { error: createError } = await supabase.from('items').insert({
@@ -80,7 +84,7 @@ export function useItems(type?: ItemType, limit?: number) {
   }
 
   const updateItem = async (id: string, values: ItemUpdate) => {
-    if (!supabase) throw new Error('Supabase no está configurado.')
+    if (!supabase) throw new Error(t('error.supabase'))
 
     try {
       const { error: updateError } = await supabase
@@ -95,7 +99,7 @@ export function useItems(type?: ItemType, limit?: number) {
   }
 
   const deleteItem = async (id: string) => {
-    if (!supabase) throw new Error('Supabase no está configurado.')
+    if (!supabase) throw new Error(t('error.supabase'))
 
     try {
       const { error: deleteError } = await supabase

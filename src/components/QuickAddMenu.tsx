@@ -7,34 +7,17 @@ import {
   WandSparkles,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-
-const options = [
-  {
-    to: '/deseos?crear=1',
-    label: 'Un deseo',
-    description: 'Algo que os haga ilusión',
-    icon: WandSparkles,
-    className: 'wish',
-  },
-  {
-    to: '/notas?crear=1',
-    label: 'Una nota',
-    description: 'Una idea o recordatorio',
-    icon: StickyNote,
-    className: 'note',
-  },
-  {
-    to: '/enlaces?crear=1',
-    label: 'Un enlace',
-    description: 'Un sitio que guardar',
-    icon: Link2,
-    className: 'link',
-  },
-]
+import { useLanguage } from '../contexts/LanguageContext'
 
 export function QuickAddMenu() {
+  const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const options = [
+    { to: '/wishlist?create=1', label: t('quickAdd.wish'), description: t('quickAdd.wishDescription'), icon: WandSparkles, className: 'wish' },
+    { to: '/notes?create=1', label: t('quickAdd.note'), description: t('quickAdd.noteDescription'), icon: StickyNote, className: 'note' },
+    { to: '/links?create=1', label: t('quickAdd.link'), description: t('quickAdd.linkDescription'), icon: Link2, className: 'link' },
+  ]
 
   useEffect(() => {
     const closeOnOutsideClick = (event: MouseEvent) => {
@@ -62,13 +45,13 @@ export function QuickAddMenu() {
         type="button"
       >
         <Plus size={19} />
-        <span>Añadir algo</span>
+        <span>{t('quickAdd.button')}</span>
         <ChevronDown className="quick-add-chevron" size={15} />
       </button>
 
       {open && (
-        <div aria-label="Qué quieres añadir" className="quick-add-menu" role="menu">
-          <p>¿Qué queréis guardar?</p>
+        <div aria-label={t('quickAdd.label')} className="quick-add-menu" role="menu">
+          <p>{t('quickAdd.question')}</p>
           {options.map(({ to, label, description, icon: Icon, className }) => (
             <Link key={to} onClick={() => setOpen(false)} role="menuitem" to={to}>
               <span className={`quick-add-option-icon ${className}`}>

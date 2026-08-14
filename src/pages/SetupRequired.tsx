@@ -1,34 +1,34 @@
 import { Database, ExternalLink, KeyRound, TerminalSquare } from 'lucide-react'
 import { Brand } from '../components/Brand'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export function SetupRequired() {
+  const { t } = useLanguage()
+
   return (
     <main className="setup-page">
       <Brand />
       <section className="setup-card">
         <span className="setup-icon"><Database size={24} /></span>
-        <p className="eyebrow">Un último paso</p>
-        <h1>Conecta Duet con Supabase</h1>
-        <p>
-          La aplicación ya está lista. Solo necesita las credenciales públicas de
-          vuestro proyecto para guardar y proteger el contenido.
-        </p>
+        <p className="eyebrow">{t('setup.eyebrow')}</p>
+        <h1>{t('setup.title')}</h1>
+        <p>{t('setup.description')}</p>
         <ol className="setup-steps">
           <li>
             <span><Database size={18} /></span>
-            <div><strong>Crea un proyecto</strong><p>En Supabase y ejecuta la migración de la carpeta <code>supabase/migrations</code>.</p></div>
+            <div><strong>{t('setup.projectTitle')}</strong><p>{t('setup.projectDescription')}</p></div>
           </li>
           <li>
             <span><KeyRound size={18} /></span>
-            <div><strong>Añade las claves</strong><p>Copia <code>.env.example</code> como <code>.env.local</code> y completa sus dos valores.</p></div>
+            <div><strong>{t('setup.keysTitle')}</strong><p>{t('setup.keysDescription')}</p></div>
           </li>
           <li>
             <span><TerminalSquare size={18} /></span>
-            <div><strong>Arranca la app</strong><p>Reinicia <code>npm run dev</code> después de guardar el entorno.</p></div>
+            <div><strong>{t('setup.startTitle')}</strong><p>{t('setup.startDescription')}</p></div>
           </li>
         </ol>
         <a className="button button-primary" href="https://supabase.com/dashboard" rel="noreferrer" target="_blank">
-          Abrir Supabase <ExternalLink size={16} />
+          {t('setup.open')} <ExternalLink size={16} />
         </a>
       </section>
     </main>

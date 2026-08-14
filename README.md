@@ -22,7 +22,6 @@ npm run dev      # Desarrollo
 npm run build    # Build de producción
 npm run preview  # Preview en /duet/
 npm run lint     # Lint
-npm test         # Tests
 ```
 
 El frontend se despliega en GitHub Pages mediante GitHub Actions. El esquema y las migraciones de Supabase están en `supabase/migrations`.

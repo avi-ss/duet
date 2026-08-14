@@ -1,6 +1,7 @@
 import { type PropsWithChildren, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import { useLanguage } from '../contexts/LanguageContext'
 
 type ModalProps = PropsWithChildren<{
   title: string
@@ -9,6 +10,7 @@ type ModalProps = PropsWithChildren<{
 }>
 
 export function Modal({ title, description, onClose, children }: ModalProps) {
+  const { t } = useLanguage()
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
@@ -33,12 +35,12 @@ export function Modal({ title, description, onClose, children }: ModalProps) {
       >
         <div className="modal-header">
           <div>
-            <p className="eyebrow">Añadir a vuestro espacio</p>
+            <p className="eyebrow">{t('modal.eyebrow')}</p>
             <h2 id="modal-title">{title}</h2>
             {description && <p>{description}</p>}
           </div>
           <button
-            aria-label="Cerrar"
+            aria-label={t('common.close')}
             className="icon-button"
             onClick={onClose}
             type="button"

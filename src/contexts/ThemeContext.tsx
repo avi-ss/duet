@@ -2,7 +2,7 @@ import {
   createContext,
   type PropsWithChildren,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
 } from 'react'
@@ -37,7 +37,7 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     return isAccentColor(saved) ? saved : 'coral'
   })
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)')
     const applyTheme = () => {
       document.documentElement.dataset.theme =
@@ -50,7 +50,7 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     return () => media.removeEventListener('change', applyTheme)
   }, [mode])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.dataset.accent = accent
     localStorage.setItem('duet-accent', accent)
   }, [accent])

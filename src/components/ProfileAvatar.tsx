@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import { getInitials } from '../lib/format'
 import type { CoupleMember, ProfileColor } from '../types/database'
+import { useLanguage } from '../contexts/LanguageContext'
 
 type ProfileAvatarProps = {
   className?: string
@@ -17,6 +18,7 @@ export function ProfileAvatar({
   size = 36,
   url,
 }: ProfileAvatarProps) {
+  const { language } = useLanguage()
   const displayName = member?.display_name ?? name ?? 'Duet'
   const color: ProfileColor = member?.profile_color ?? 'coral'
   const style = { '--avatar-size': `${size}px` } as CSSProperties
@@ -28,7 +30,7 @@ export function ProfileAvatar({
       style={style}
       title={displayName}
     >
-      {url ? <img alt={`Foto de ${displayName}`} src={url} /> : getInitials(displayName)}
+      {url ? <img alt={language === 'es' ? `Foto de ${displayName}` : `Photo of ${displayName}`} src={url} /> : getInitials(displayName)}
     </span>
   )
 }

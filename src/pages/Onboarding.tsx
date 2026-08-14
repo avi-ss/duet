@@ -2,6 +2,7 @@ import { type FormEvent, useState } from 'react'
 import { ArrowRight, HeartHandshake, LoaderCircle, TicketCheck } from 'lucide-react'
 import { Brand } from '../components/Brand'
 import { useCouple } from '../contexts/CoupleContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import { getErrorMessage } from '../lib/errors'
 import { supabase } from '../lib/supabase'
 
@@ -9,6 +10,7 @@ type Mode = 'create' | 'join'
 
 export function Onboarding() {
   const { refresh } = useCouple()
+  const { t } = useLanguage()
   const [mode, setMode] = useState<Mode>('create')
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
@@ -41,27 +43,27 @@ export function Onboarding() {
       <Brand />
       <section className="onboarding-card">
         <div className="onboarding-icon"><HeartHandshake size={28} /></div>
-        <p className="eyebrow">Empecemos</p>
-        <h1>Cread vuestro espacio</h1>
-        <p>Solo tenéis que hacerlo una vez. Después, todo lo que guardéis aparecerá para ambos.</p>
+        <p className="eyebrow">{t('onboarding.eyebrow')}</p>
+        <h1>{t('onboarding.title')}</h1>
+        <p>{t('onboarding.description')}</p>
 
         <div className="segmented-control">
-          <button className={mode === 'create' ? 'active' : ''} onClick={() => setMode('create')} type="button">Crear espacio</button>
-          <button className={mode === 'join' ? 'active' : ''} onClick={() => setMode('join')} type="button">Tengo un código</button>
+          <button className={mode === 'create' ? 'active' : ''} onClick={() => setMode('create')} type="button">{t('onboarding.createTab')}</button>
+          <button className={mode === 'join' ? 'active' : ''} onClick={() => setMode('join')} type="button">{t('onboarding.joinTab')}</button>
         </div>
 
         <form onSubmit={handleSubmit}>
           {mode === 'create' ? (
             <label>
-              <span>Nombre de vuestro espacio</span>
+              <span>{t('onboarding.spaceName')}</span>
               <input autoFocus maxLength={60} onChange={(event) => setName(event.target.value)} placeholder="Alba & Nico" required value={name} />
-              <small>Podréis cambiarlo en ajustes.</small>
+              <small>{t('onboarding.spaceHelp')}</small>
             </label>
           ) : (
             <label>
-              <span>Código de invitación</span>
+              <span>{t('onboarding.code')}</span>
               <input autoFocus className="code-input" maxLength={10} onChange={(event) => setCode(event.target.value.toUpperCase())} placeholder="DUET1234" required value={code} />
-              <small>Pídeselo a la persona que creó el espacio.</small>
+              <small>{t('onboarding.codeHelp')}</small>
             </label>
           )}
 
@@ -69,7 +71,7 @@ export function Onboarding() {
 
           <button className="button button-primary" disabled={isSubmitting}>
             {isSubmitting ? <LoaderCircle className="spin" size={18} /> : mode === 'create' ? <HeartHandshake size={18} /> : <TicketCheck size={18} />}
-            {mode === 'create' ? 'Crear nuestro espacio' : 'Unirme al espacio'}
+            {mode === 'create' ? t('onboarding.create') : t('onboarding.join')}
             {!isSubmitting && <ArrowRight size={17} />}
           </button>
         </form>

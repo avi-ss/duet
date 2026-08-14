@@ -10,20 +10,21 @@ import {
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCouple } from '../contexts/CoupleContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import { Brand } from './Brand'
 import { ProfileAvatar } from './ProfileAvatar'
 import { QuickAddMenu } from './QuickAddMenu'
 
-const navigation = [
-  { to: '/', label: 'Inicio', icon: Home, end: true },
-  { to: '/deseos', label: 'Deseos', icon: WandSparkles },
-  { to: '/notas', label: 'Notas', icon: StickyNote },
-  { to: '/enlaces', label: 'Enlaces', icon: Link2 },
-]
-
 export function AppShell() {
   const { user, signOut } = useAuth()
   const { avatarUrls, couple, membership } = useCouple()
+  const { t } = useLanguage()
+  const navigation = [
+    { to: '/', label: t('nav.home'), icon: Home, end: true },
+    { to: '/wishlist', label: t('nav.wishlist'), icon: WandSparkles },
+    { to: '/notes', label: t('nav.notes'), icon: StickyNote },
+    { to: '/links', label: t('nav.links'), icon: Link2 },
+  ]
 
   return (
     <div className="app-shell">
@@ -33,12 +34,12 @@ export function AppShell() {
         <div className="couple-badge">
           <span><Heart size={14} fill="currentColor" /></span>
           <div>
-            <small>Vuestro espacio</small>
+          <small>{t('space.label')}</small>
             <strong>{couple?.name}</strong>
           </div>
         </div>
 
-        <nav className="main-nav" aria-label="Navegación principal">
+        <nav className="main-nav" aria-label={t('nav.mainLabel')}>
           {navigation.map(({ to, label, icon: Icon, end }) => (
             <NavLink end={end} key={to} to={to}>
               <Icon size={19} strokeWidth={1.8} />
@@ -48,8 +49,8 @@ export function AppShell() {
         </nav>
 
         <div className="sidebar-bottom">
-          <NavLink className="settings-link" to="/ajustes">
-            <Settings size={18} /> Ajustes
+          <NavLink className="settings-link" to="/settings">
+            <Settings size={18} /> {t('nav.settings')}
           </NavLink>
           <div className="user-chip">
             <ProfileAvatar
@@ -63,7 +64,7 @@ export function AppShell() {
               <small>{user?.email}</small>
             </div>
             <button
-              aria-label="Cerrar sesión"
+              aria-label={t('nav.signOut')}
               className="icon-button small"
               onClick={() => void signOut()}
               type="button"
@@ -77,14 +78,14 @@ export function AppShell() {
       <main className="main-content">
         <div className="mobile-header">
           <Brand />
-          <NavLink aria-label="Ajustes" className="icon-button" to="/ajustes">
+          <NavLink aria-label={t('nav.settings')} className="icon-button" to="/settings">
             <Settings size={20} />
           </NavLink>
         </div>
         <Outlet />
       </main>
 
-      <nav className="mobile-nav" aria-label="Navegación móvil">
+      <nav className="mobile-nav" aria-label={t('nav.mobileLabel')}>
         {navigation.map(({ to, label, icon: Icon, end }) => (
           <NavLink end={end} key={to} to={to}>
             <Icon size={20} strokeWidth={1.8} />

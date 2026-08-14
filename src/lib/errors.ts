@@ -10,5 +10,7 @@ export function getErrorMessage(error: unknown) {
     return error.message
   }
 
-  return 'Ha ocurrido algo inesperado. Inténtalo de nuevo.'
+  return localStorage.getItem('duet-language') === 'en'
+    ? 'Something unexpected happened. Please try again.'
+    : 'Ha ocurrido algo inesperado. Inténtalo de nuevo.'
 }

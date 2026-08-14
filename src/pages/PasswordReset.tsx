@@ -2,11 +2,13 @@ import { type FormEvent, useState } from 'react'
 import { CheckCircle2, KeyRound, LoaderCircle } from 'lucide-react'
 import { Brand } from '../components/Brand'
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import { getErrorMessage } from '../lib/errors'
 import { supabase } from '../lib/supabase'
 
 export function PasswordReset() {
   const { completePasswordRecovery } = useAuth()
+  const { t } = useLanguage()
   const [password, setPassword] = useState('')
   const [confirmation, setConfirmation] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -22,7 +24,7 @@ export function PasswordReset() {
     event.preventDefault()
     if (!supabase) return
     if (password !== confirmation) {
-      setError('Las contraseñas no coinciden.')
+      setError(t('settings.passwordMismatch'))
       return
     }
 
@@ -48,34 +50,34 @@ export function PasswordReset() {
         </span>
         {success ? (
           <>
-            <p className="eyebrow">Todo listo</p>
-            <h1>Contraseña actualizada</h1>
-            <p>Ya puedes seguir usando Duet con tu nueva contraseña.</p>
+            <p className="eyebrow">{t('reset.ready')}</p>
+            <h1>{t('reset.updatedTitle')}</h1>
+            <p>{t('reset.updatedDescription')}</p>
             <button className="button button-primary" onClick={completePasswordRecovery} type="button">
-              Entrar en Duet
+              {t('reset.enter')}
             </button>
           </>
         ) : (
           <>
-            <p className="eyebrow">Recuperar acceso</p>
-            <h1>Elige una contraseña nueva</h1>
-            <p>Utiliza al menos ocho caracteres y no reutilices otra contraseña.</p>
+            <p className="eyebrow">{t('auth.recoverAccess')}</p>
+            <h1>{t('reset.title')}</h1>
+            <p>{t('reset.description')}</p>
             <form onSubmit={handleSubmit}>
               <label>
-                <span>Nueva contraseña</span>
+                <span>{t('settings.newPassword')}</span>
                 <input autoComplete="new-password" minLength={8} onChange={(event) => setPassword(event.target.value)} required type="password" value={password} />
               </label>
               <label>
-                <span>Repite la contraseña</span>
+                <span>{t('settings.repeatPassword')}</span>
                 <input autoComplete="new-password" minLength={8} onChange={(event) => setConfirmation(event.target.value)} required type="password" value={confirmation} />
               </label>
               {error && <p className="form-error">{error}</p>}
               <button className="button button-primary" disabled={isSubmitting}>
                 {isSubmitting && <LoaderCircle className="spin" size={17} />}
-                Guardar contraseña
+                {t('reset.save')}
               </button>
               <button className="auth-switch" onClick={returnToLogin} type="button">
-                Volver al inicio de sesión
+                {t('auth.backToLogin')}
               </button>
             </form>
           </>

@@ -4,68 +4,37 @@ import { useSearchParams } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { ItemForm } from '../components/ItemForm'
 import { Modal } from '../components/Modal'
+import { useLanguage } from '../contexts/LanguageContext'
+import { useDelayedLoading } from '../hooks/useDelayedLoading'
 import { useItems } from '../hooks/useItems'
 import type { Item, ItemType } from '../types/database'
-
-const collectionConfig: Record<
-  ItemType,
-  {
-    eyebrow: string
-    title: string
-    highlighted: string
-    description: string
-    singular: string
-    emptyTitle: string
-    emptyDescription: string
-    icon: typeof WandSparkles
-  }
-> = {
-  wishlist: {
-    eyebrow: 'Para algún día',
-    title: 'Nuestra lista de',
-    highlighted: 'deseos',
-    description: 'Pequeñas y grandes cosas que os hacen ilusión.',
-    singular: 'deseo',
-    emptyTitle: 'Aún no hay deseos por aquí',
-    emptyDescription: 'Añadid algo que os apetezca comprar, vivir o regalar.',
-    icon: WandSparkles,
-  },
-  note: {
-    eyebrow: 'Entre nosotros',
-    title: 'Nuestras',
-    highlighted: 'notas',
-    description: 'Ideas, recordatorios y palabras que queréis conservar.',
-    singular: 'nota',
-    emptyTitle: 'Una página por estrenar',
-    emptyDescription: 'Escribid algo que queráis recordar los dos.',
-    icon: StickyNote,
-  },
-  link: {
-    eyebrow: 'Para volver después',
-    title: 'Nuestros',
-    highlighted: 'enlaces',
-    description: 'Restaurantes, viajes, recetas y hallazgos compartidos.',
-    singular: 'enlace',
-    emptyTitle: 'Guardad vuestro primer hallazgo',
-    emptyDescription: 'Ese sitio, receta o idea que no queréis perder.',
-    icon: Link2,
-  },
-}
 
 type CollectionProps = {
   type: ItemType
 }
 
 export function Collection({ type }: CollectionProps) {
-  const config = collectionConfig[type]
+  const { t } = useLanguage()
+  const icons: Record<ItemType, typeof WandSparkles> = { wishlist: WandSparkles, note: StickyNote, link: Link2 }
+  const config = {
+    eyebrow: t(`collection.${type}.eyebrow`),
+    title: t(`collection.${type}.title`),
+    highlighted: t(`collection.${type}.highlighted`),
+    description: t(`collection.${type}.description`),
+    singular: t(`collection.${type}.singular`),
+    emptyTitle: t(`collection.${type}.emptyTitle`),
+    emptyDescription: t(`collection.${type}.emptyDescription`),
+    icon: icons[type],
+  }
   const Icon = config.icon
   const [searchParams, setSearchParams] = useSearchParams()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const { items, isLoading, error, createItem, updateItem, deleteItem } = useItems(type)
+  const showLoading = useDelayedLoading(isLoading)
 
   useEffect(() => {
-    if (searchParams.get('crear') === '1') {
+    if (searchParams.get('create') === '1' || searchParams.get('crear') === '1') {
       setModalOpen(true)
       setSearchParams({}, { replace: true })
     }
@@ -85,17 +54,17 @@ export function Collection({ type }: CollectionProps) {
           <p>{config.description}</p>
         </div>
         <button className="button button-primary" onClick={() => setModalOpen(true)} type="button">
-          <Plus size={18} /> Añadir {config.singular}
+          <Plus size={18} /> {t('collection.add', { item: config.singular })}
         </button>
       </header>
 
-      {error && <p className="inline-error">No se pudo cargar el contenido: {error}</p>}
+      {error && <p className="inline-error">{t('collection.loadError', { error })}</p>}
 
-      {isLoading ? (
+      {showLoading ? (
         <div className="card-skeleton-grid">
           {[1, 2, 3, 4].map((number) => <div className="card-skeleton" key={number} />)}
         </div>
-      ) : items.length > 0 ? (
+      ) : isLoading ? null : items.length > 0 ? (
         <div className={`collection-grid ${type === 'note' ? 'note-grid' : ''}`}>
           {items.map((item) => (
             <ItemCard
@@ -113,7 +82,7 @@ export function Collection({ type }: CollectionProps) {
           ))}
           <button className="add-card" onClick={() => setModalOpen(true)} type="button">
             <span><Plus size={22} /></span>
-            Añadir {config.singular}
+            {t('collection.add', { item: config.singular })}
           </button>
         </div>
       ) : (
@@ -122,16 +91,16 @@ export function Collection({ type }: CollectionProps) {
           <h2>{config.emptyTitle}</h2>
           <p>{config.emptyDescription}</p>
           <button className="button button-primary" onClick={() => setModalOpen(true)} type="button">
-            <Plus size={17} /> Añadir {config.singular}
+            <Plus size={17} /> {t('collection.add', { item: config.singular })}
           </button>
         </div>
       )}
 
       {modalOpen && (
         <Modal
-          description={editingItem ? 'Cambia lo que necesites y vuelve a guardarlo.' : config.description}
+          description={editingItem ? t('modal.editDescription') : config.description}
           onClose={closeModal}
-          title={editingItem ? `Editar ${config.singular}` : `Nuevo ${config.singular}`}
+          title={editingItem ? t('collection.edit', { item: config.singular }) : t('collection.new', { item: config.singular })}
         >
           <ItemForm
             item={editingItem ?? undefined}
@@ -141,7 +110,7 @@ export function Collection({ type }: CollectionProps) {
               else await createItem(values)
               closeModal()
             }}
-            submitLabel={editingItem ? 'Guardar cambios' : `Guardar ${config.singular}`}
+            submitLabel={editingItem ? t('common.saveChanges') : t('collection.save', { item: config.singular })}
             type={type}
           />
         </Modal>

@@ -4,6 +4,7 @@ import {
   Check,
   Copy,
   KeyRound,
+  Languages,
   LogOut,
   Monitor,
   Moon,
@@ -17,6 +18,7 @@ import {
 import { ProfileAvatar } from '../components/ProfileAvatar'
 import { useAuth } from '../contexts/AuthContext'
 import { useCouple } from '../contexts/CoupleContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import {
   type AccentColor,
   type ThemeMode,
@@ -26,32 +28,20 @@ import { getErrorMessage } from '../lib/errors'
 import { supabase } from '../lib/supabase'
 import type { ProfileColor } from '../types/database'
 
-const profileColors: Array<{ id: ProfileColor; label: string }> = [
-  { id: 'coral', label: 'Coral' },
-  { id: 'sage', label: 'Salvia' },
-  { id: 'blue', label: 'Océano' },
-  { id: 'plum', label: 'Ciruela' },
-  { id: 'amber', label: 'Ámbar' },
-  { id: 'rose', label: 'Rosa' },
+const profileColors: ProfileColor[] = ['coral', 'sage', 'blue', 'plum', 'amber', 'rose']
+
+const themeModes: Array<{ id: ThemeMode; icon: typeof Sun }> = [
+  { id: 'light', icon: Sun },
+  { id: 'dark', icon: Moon },
+  { id: 'system', icon: Monitor },
 ]
 
-const themeModes: Array<{ id: ThemeMode; label: string; icon: typeof Sun }> = [
-  { id: 'light', label: 'Claro', icon: Sun },
-  { id: 'dark', label: 'Oscuro', icon: Moon },
-  { id: 'system', label: 'Sistema', icon: Monitor },
-]
-
-const accentColors: Array<{ id: AccentColor; label: string }> = [
-  { id: 'coral', label: 'Coral' },
-  { id: 'ocean', label: 'Océano' },
-  { id: 'forest', label: 'Bosque' },
-  { id: 'plum', label: 'Ciruela' },
-  { id: 'amber', label: 'Ámbar' },
-]
+const accentColors: AccentColor[] = ['coral', 'ocean', 'forest', 'plum', 'amber']
 
 export function Settings() {
   const { user, signOut } = useAuth()
   const { avatarUrls, couple, members, membership, refresh } = useCouple()
+  const { language, setLanguage, t } = useLanguage()
   const { accent, mode, setAccent, setMode } = useTheme()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -75,6 +65,8 @@ export function Settings() {
   const otherMemberColor = members.find(
     (member) => member.user_id !== user?.id,
   )?.profile_color
+  const colorLabel = (color: ProfileColor | AccentColor) => t(`color.${color}`)
+  const themeLabel = (themeMode: ThemeMode) => t(`settings.${themeMode}`)
 
   useEffect(() => {
     setSpaceName(couple?.name ?? '')
@@ -99,7 +91,7 @@ export function Settings() {
         .eq('id', couple.id)
       if (error) throw error
       await refresh()
-      setSpaceMessage('Nombre actualizado.')
+      setSpaceMessage(t('settings.spaceUpdated'))
     } catch (error) {
       setSpaceMessage(getErrorMessage(error))
     } finally {
@@ -122,7 +114,7 @@ export function Settings() {
         .eq('user_id', user.id)
       if (error) throw error
       await refresh()
-      setProfileMessage('Perfil actualizado.')
+      setProfileMessage(t('settings.profileUpdated'))
     } catch (error) {
       setProfileMessage(getErrorMessage(error))
     } finally {
@@ -136,12 +128,12 @@ export function Settings() {
     setProfileMessage(null)
 
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setProfileMessage('Usa una imagen JPG, PNG o WebP.')
+      setProfileMessage(t('settings.invalidPhoto'))
       event.target.value = ''
       return
     }
     if (file.size > 2 * 1024 * 1024) {
-      setProfileMessage('La imagen no puede superar 2 MB.')
+      setProfileMessage(t('settings.photoTooLarge'))
       event.target.value = ''
       return
     }
@@ -169,7 +161,7 @@ export function Settings() {
         await supabase.storage.from('avatars').remove([previousAvatarPath])
       }
       await refresh()
-      setProfileMessage('Foto actualizada.')
+      setProfileMessage(t('settings.photoUpdated'))
     } catch (error) {
       setProfileMessage(getErrorMessage(error))
     } finally {
@@ -190,7 +182,7 @@ export function Settings() {
       if (profileError) throw profileError
       await supabase.storage.from('avatars').remove([membership.avatar_path])
       await refresh()
-      setProfileMessage('Foto eliminada.')
+      setProfileMessage(t('settings.photoRemoved'))
     } catch (error) {
       setProfileMessage(getErrorMessage(error))
     } finally {
@@ -203,7 +195,7 @@ export function Settings() {
     if (!supabase) return
     setPasswordMessage(null)
     if (newPassword !== passwordConfirmation) {
-      setPasswordMessage('Las contraseñas no coinciden.')
+      setPasswordMessage(t('settings.passwordMismatch'))
       return
     }
 
@@ -213,7 +205,7 @@ export function Settings() {
       if (error) throw error
       setNewPassword('')
       setPasswordConfirmation('')
-      setPasswordMessage('Contraseña actualizada correctamente.')
+      setPasswordMessage(t('settings.passwordUpdated'))
     } catch (error) {
       setPasswordMessage(getErrorMessage(error))
     } finally {
@@ -232,9 +224,9 @@ export function Settings() {
     <div className="page settings-page">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Vuestro Duet</p>
-          <h1>Ajustes</h1>
-          <p>Personaliza tu perfil, la apariencia y la seguridad.</p>
+          <p className="eyebrow">{t('settings.eyebrow')}</p>
+          <h1>{t('settings.title')}</h1>
+          <p>{t('settings.subtitle')}</p>
         </div>
       </header>
 
@@ -242,7 +234,7 @@ export function Settings() {
         <section className="settings-card profile-settings-card">
           <div className="settings-card-heading">
             <span><UserRound size={20} /></span>
-            <div><h2>Tu perfil</h2><p>Así aparecerás en el contenido que crees.</p></div>
+            <div><h2>{t('settings.profileTitle')}</h2><p>{t('settings.profileDescription')}</p></div>
           </div>
 
           <div className="avatar-editor">
@@ -255,36 +247,36 @@ export function Settings() {
             <div>
               <input accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => void uploadAvatar(event)} ref={fileInputRef} type="file" />
               <button className="button button-secondary" disabled={isUploading} onClick={() => fileInputRef.current?.click()} type="button">
-                <Camera size={16} /> {isUploading ? 'Subiendo…' : 'Cambiar foto'}
+                <Camera size={16} /> {isUploading ? t('settings.uploading') : t('settings.changePhoto')}
               </button>
               {membership?.avatar_path && (
-                <button aria-label="Eliminar foto" className="icon-button" disabled={isUploading} onClick={() => void removeAvatar()} type="button">
+                <button aria-label={t('settings.removePhoto')} className="icon-button" disabled={isUploading} onClick={() => void removeAvatar()} type="button">
                   <Trash2 size={16} />
                 </button>
               )}
-              <small>JPG, PNG o WebP · máximo 2 MB</small>
+              <small>{t('settings.photoHelp')}</small>
             </div>
           </div>
 
           <form className="profile-form" onSubmit={saveProfile}>
             <label>
-              <span>Nombre</span>
+              <span>{t('settings.name')}</span>
               <input maxLength={50} onChange={(event) => setGreetingName(event.target.value)} required value={greetingName} />
             </label>
             <fieldset className="color-fieldset">
-              <legend>Tu color</legend>
+              <legend>{t('settings.yourColor')}</legend>
               <div className="profile-color-grid">
                 {profileColors.map((color) => (
-                  <button aria-label={color.label} aria-pressed={profileColor === color.id} className={profileColor === color.id ? 'active' : ''} data-member-color={color.id} disabled={otherMemberColor === color.id} key={color.id} onClick={() => setProfileColor(color.id)} title={otherMemberColor === color.id ? 'Este color ya lo usa tu pareja' : color.label} type="button">
-                    <span /> {color.label}
-                    {profileColor === color.id && <Check size={13} />}
+                  <button aria-label={colorLabel(color)} aria-pressed={profileColor === color} className={profileColor === color ? 'active' : ''} data-member-color={color} disabled={otherMemberColor === color} key={color} onClick={() => setProfileColor(color)} title={otherMemberColor === color ? t('settings.colorInUse') : colorLabel(color)} type="button">
+                    <span /> {colorLabel(color)}
+                    {profileColor === color && <Check size={13} />}
                   </button>
                 ))}
               </div>
             </fieldset>
             {profileMessage && <p className="settings-message">{profileMessage}</p>}
             <button className="button button-secondary" disabled={isSavingProfile}>
-              <Save size={16} /> Guardar perfil
+              <Save size={16} /> {t('settings.saveProfile')}
             </button>
           </form>
         </section>
@@ -292,26 +284,34 @@ export function Settings() {
         <section className="settings-card appearance-card">
           <div className="settings-card-heading">
             <span><Palette size={20} /></span>
-            <div><h2>Apariencia</h2><p>Se guarda únicamente en este dispositivo.</p></div>
+            <div><h2>{t('settings.appearanceTitle')}</h2><p>{t('settings.appearanceDescription')}</p></div>
           </div>
           <fieldset className="appearance-fieldset">
-            <legend>Tema</legend>
+            <legend>{t('settings.theme')}</legend>
             <div className="theme-options">
-              {themeModes.map(({ id, label, icon: Icon }) => (
+              {themeModes.map(({ id, icon: Icon }) => (
                 <button aria-pressed={mode === id} className={mode === id ? 'active' : ''} key={id} onClick={() => setMode(id)} type="button">
-                  <Icon size={17} /> {label}
+                  <Icon size={17} /> {themeLabel(id)}
                 </button>
               ))}
             </div>
           </fieldset>
           <fieldset className="appearance-fieldset">
-            <legend>Color de acento</legend>
+            <legend>{t('settings.accent')}</legend>
             <div className="accent-options">
               {accentColors.map((color) => (
-                <button aria-label={color.label} aria-pressed={accent === color.id} className={accent === color.id ? 'active' : ''} data-accent-preview={color.id} key={color.id} onClick={() => setAccent(color.id)} title={color.label} type="button">
-                  <span /> {accent === color.id && <Check size={13} />}
+                <button aria-label={colorLabel(color)} aria-pressed={accent === color} className={accent === color ? 'active' : ''} data-accent-preview={color} key={color} onClick={() => setAccent(color)} title={colorLabel(color)} type="button">
+                  <span /> {accent === color && <Check size={13} />}
                 </button>
               ))}
+            </div>
+          </fieldset>
+          <fieldset className="appearance-fieldset">
+            <legend><Languages size={15} /> {t('settings.language')}</legend>
+            <p className="appearance-help">{t('settings.languageDescription')}</p>
+            <div className="language-options">
+              <button aria-pressed={language === 'es'} className={language === 'es' ? 'active' : ''} onClick={() => setLanguage('es')} type="button">{t('settings.spanish')}</button>
+              <button aria-pressed={language === 'en'} className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')} type="button">{t('settings.english')}</button>
             </div>
           </fieldset>
         </section>
@@ -319,51 +319,51 @@ export function Settings() {
         <section className="settings-card">
           <div className="settings-card-heading">
             <span><UserRound size={20} /></span>
-            <div><h2>Espacio compartido</h2><p>El nombre que veréis al entrar.</p></div>
+            <div><h2>{t('settings.spaceTitle')}</h2><p>{t('settings.spaceDescription')}</p></div>
           </div>
           <form onSubmit={saveSpaceName}>
             <label>
-              <span>Nombre</span>
+              <span>{t('settings.name')}</span>
               <input disabled={membership?.role !== 'owner'} maxLength={60} onChange={(event) => setSpaceName(event.target.value)} required value={spaceName} />
-              {membership?.role !== 'owner' && <small>Solo quien creó el espacio puede cambiar este nombre.</small>}
+              {membership?.role !== 'owner' && <small>{t('settings.ownerOnly')}</small>}
             </label>
             {spaceMessage && <p className="settings-message">{spaceMessage}</p>}
-            <button className="button button-secondary" disabled={isSavingSpace || membership?.role !== 'owner'}><Save size={16} /> Guardar cambios</button>
+            <button className="button button-secondary" disabled={isSavingSpace || membership?.role !== 'owner'}><Save size={16} /> {t('common.saveChanges')}</button>
           </form>
         </section>
 
         <section className="settings-card invite-card">
           <div className="settings-card-heading">
             <span><ShieldCheck size={20} /></span>
-            <div><h2>Invita a tu pareja</h2><p>Comparte este código una sola vez.</p></div>
+            <div><h2>{t('settings.inviteTitle')}</h2><p>{t('settings.inviteDescription')}</p></div>
           </div>
           <div className="invite-code">
             <strong>{couple?.invite_code}</strong>
-            <button aria-label="Copiar código" className="icon-button" onClick={() => void copyCode()} type="button">{copied ? <Check size={18} /> : <Copy size={18} />}</button>
+            <button aria-label={t('settings.copyCode')} className="icon-button" onClick={() => void copyCode()} type="button">{copied ? <Check size={18} /> : <Copy size={18} />}</button>
           </div>
-          <p className="muted-copy">Quien use el código podrá ver y editar el contenido compartido.</p>
+          <p className="muted-copy">{t('settings.inviteHelp')}</p>
         </section>
 
         <section className="settings-card password-settings-card">
           <div className="settings-card-heading">
             <span><KeyRound size={20} /></span>
-            <div><h2>Cambiar contraseña</h2><p>No envía emails y se aplica inmediatamente.</p></div>
+            <div><h2>{t('settings.passwordTitle')}</h2><p>{t('settings.passwordDescription')}</p></div>
           </div>
           <form onSubmit={changePassword}>
-            <label><span>Nueva contraseña</span><input autoComplete="new-password" minLength={8} onChange={(event) => setNewPassword(event.target.value)} required type="password" value={newPassword} /></label>
-            <label><span>Repite la contraseña</span><input autoComplete="new-password" minLength={8} onChange={(event) => setPasswordConfirmation(event.target.value)} required type="password" value={passwordConfirmation} /></label>
+            <label><span>{t('settings.newPassword')}</span><input autoComplete="new-password" minLength={8} onChange={(event) => setNewPassword(event.target.value)} required type="password" value={newPassword} /></label>
+            <label><span>{t('settings.repeatPassword')}</span><input autoComplete="new-password" minLength={8} onChange={(event) => setPasswordConfirmation(event.target.value)} required type="password" value={passwordConfirmation} /></label>
             {passwordMessage && <p className="settings-message">{passwordMessage}</p>}
-            <button className="button button-secondary" disabled={isSavingPassword}><KeyRound size={16} /> Actualizar contraseña</button>
+            <button className="button button-secondary" disabled={isSavingPassword}><KeyRound size={16} /> {t('settings.updatePassword')}</button>
           </form>
         </section>
 
         <section className="settings-card account-card">
           <div className="settings-card-heading">
             <span><UserRound size={20} /></span>
-            <div><h2>Sesión</h2><p>{user?.email}</p></div>
+            <div><h2>{t('settings.session')}</h2><p>{user?.email}</p></div>
           </div>
-          <div className="account-meta"><span>Rol</span><strong>{membership?.role === 'owner' ? 'Creador/a' : 'Miembro'}</strong></div>
-          <button className="button button-ghost danger-text" onClick={() => void signOut()} type="button"><LogOut size={16} /> Cerrar sesión</button>
+          <div className="account-meta"><span>{t('settings.role')}</span><strong>{membership?.role === 'owner' ? t('settings.owner') : t('settings.member')}</strong></div>
+          <button className="button button-ghost danger-text" onClick={() => void signOut()} type="button"><LogOut size={16} /> {t('nav.signOut')}</button>
         </section>
       </div>
     </div>

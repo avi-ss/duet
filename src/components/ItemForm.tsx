@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { LoaderCircle } from 'lucide-react'
+import { useLanguage } from '../contexts/LanguageContext'
 import { getErrorMessage } from '../lib/errors'
 import type { Item, ItemType } from '../types/database'
 
@@ -16,28 +17,19 @@ type ItemFormProps = {
   }) => Promise<void>
 }
 
-const placeholders: Record<ItemType, { title: string; description: string }> = {
-  wishlist: {
-    title: 'Esa cafetera tan bonita',
-    description: 'Tamaño, color, para qué ocasión…',
-  },
-  note: {
-    title: 'Algo que no queremos olvidar',
-    description: 'Escribe aquí vuestra nota…',
-  },
-  link: {
-    title: 'Un sitio para la próxima escapada',
-    description: '¿Por qué merece la pena guardarlo?',
-  },
-}
-
 export function ItemForm({
   item,
   type,
-  submitLabel = 'Guardar',
+  submitLabel,
   onCancel,
   onSubmit,
 }: ItemFormProps) {
+  const { t } = useLanguage()
+  const placeholders = {
+    wishlist: { title: t('item.placeholderWishTitle'), description: t('item.placeholderWishDescription') },
+    note: { title: t('item.placeholderNoteTitle'), description: t('item.placeholderNoteDescription') },
+    link: { title: t('item.placeholderLinkTitle'), description: t('item.placeholderLinkDescription') },
+  }
   const [title, setTitle] = useState(item?.title ?? '')
   const [description, setDescription] = useState(item?.description ?? '')
   const [url, setUrl] = useState(item?.url ?? '')
@@ -65,7 +57,7 @@ export function ItemForm({
   return (
     <form className="item-form" onSubmit={handleSubmit}>
       <label>
-        <span>Título</span>
+        <span>{t('item.title')}</span>
         <input
           autoFocus
           maxLength={120}
@@ -78,7 +70,7 @@ export function ItemForm({
 
       {(type === 'wishlist' || type === 'link') && (
         <label>
-          <span>Enlace <small>opcional</small></span>
+          <span>{t('item.url')} <small>{t('common.optional')}</small></span>
           <input
             inputMode="url"
             onChange={(event) => setUrl(event.target.value)}
@@ -90,7 +82,7 @@ export function ItemForm({
       )}
 
       <label>
-        <span>{type === 'note' ? 'Nota' : 'Detalles'} <small>opcional</small></span>
+        <span>{type === 'note' ? t('item.note') : t('item.details')} <small>{t('common.optional')}</small></span>
         <textarea
           maxLength={1000}
           onChange={(event) => setDescription(event.target.value)}
@@ -104,11 +96,11 @@ export function ItemForm({
 
       <div className="form-actions">
         <button className="button button-ghost" onClick={onCancel} type="button">
-          Cancelar
+          {t('common.cancel')}
         </button>
         <button className="button button-primary" disabled={isSubmitting}>
           {isSubmitting && <LoaderCircle className="spin" size={17} />}
-          {submitLabel}
+          {submitLabel ?? t('common.save')}
         </button>
       </div>
     </form>

@@ -14,6 +14,7 @@ import { getErrorMessage } from '../lib/errors'
 import { formatDate, getSafeUrl } from '../lib/format'
 import type { Item } from '../types/database'
 import { useCouple } from '../contexts/CoupleContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import { ProfileAvatar } from './ProfileAvatar'
 
 type ItemCardProps = {
@@ -34,16 +35,17 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isPinning, setIsPinning] = useState(false)
   const { avatarUrls, members, membership } = useCouple()
+  const { locale, t } = useLanguage()
   const Icon = iconByType[item.type]
   const safeUrl = getSafeUrl(item.url)
   const creator = members.find((member) => member.user_id === item.created_by)
   const creatorName =
     creator?.user_id === membership?.user_id
-      ? 'Tú'
-      : creator?.display_name ?? 'Tu pareja'
+      ? t('item.you')
+      : creator?.display_name ?? t('item.partner')
 
   const handleDelete = async () => {
-    if (!window.confirm(`¿Eliminar “${item.title}”?`)) return
+    if (!window.confirm(t('item.deleteConfirm', { title: item.title }))) return
     setIsDeleting(true)
     try {
       await onDelete(item)
@@ -78,12 +80,12 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
           <span className="item-icon" aria-hidden="true">
             <Icon size={18} strokeWidth={1.8} />
           </span>
-          {item.is_pinned && <span className="pinned-badge"><Pin size={11} fill="currentColor" /> Fijado</span>}
+          {item.is_pinned && <span className="pinned-badge"><Pin size={11} fill="currentColor" /> {t('item.pinned')}</span>}
         </div>
         <div className="item-menu-wrap">
           <button
             aria-expanded={menuOpen}
-            aria-label={`Opciones de ${item.title}`}
+            aria-label={t('item.options', { title: item.title })}
             className="icon-button small"
             onClick={() => setMenuOpen((open) => !open)}
             type="button"
@@ -95,12 +97,12 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
               {onTogglePin && (
                 <button disabled={isPinning} onClick={() => void handleTogglePin()} type="button">
                   {item.is_pinned ? <PinOff size={15} /> : <Pin size={15} />}
-                  {item.is_pinned ? 'Desfijar' : 'Fijar'}
+                  {item.is_pinned ? t('item.unpin') : t('item.pin')}
                 </button>
               )}
               {onEdit && (
                 <button onClick={() => { setMenuOpen(false); onEdit(item) }} type="button">
-                  <Pencil size={15} /> Editar
+                  <Pencil size={15} /> {t('item.edit')}
                 </button>
               )}
               <button
@@ -109,7 +111,7 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
                 onClick={() => void handleDelete()}
                 type="button"
               >
-                <Trash2 size={15} /> Eliminar
+                <Trash2 size={15} /> {t('item.delete')}
               </button>
             </div>
           )}
@@ -129,10 +131,10 @@ export function ItemCard({ item, onEdit, onTogglePin, onDelete }: ItemCardProps)
           />
           <span>{creatorName}</span>
         </span>
-        <time dateTime={item.created_at}>{formatDate(item.created_at)}</time>
+        <time dateTime={item.created_at}>{formatDate(item.created_at, locale)}</time>
         {safeUrl && (
           <a href={safeUrl} rel="noreferrer" target="_blank">
-            Abrir <ExternalLink size={13} />
+            {t('item.open')} <ExternalLink size={13} />
           </a>
         )}
       </div>

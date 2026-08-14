@@ -1,12 +1,17 @@
-export function formatDate(date: string) {
-  return new Intl.DateTimeFormat('es-ES', {
+export function formatDate(date: string, locale = 'es-ES') {
+  return new Intl.DateTimeFormat(locale, {
     day: 'numeric',
     month: 'short',
   }).format(new Date(date))
 }
 
-export function getGreeting() {
+export function getGreeting(language: 'es' | 'en' = 'es') {
   const hour = new Date().getHours()
+  if (language === 'en') {
+    if (hour < 13) return 'Good morning'
+    if (hour < 20) return 'Good afternoon'
+    return 'Good evening'
+  }
   if (hour < 13) return 'Buenos días'
   if (hour < 20) return 'Buenas tardes'
   return 'Buenas noches'
