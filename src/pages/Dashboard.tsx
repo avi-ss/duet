@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Pin, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { AdaptiveGridItem } from '../components/AdaptiveGrid'
 import { ItemCard } from '../components/ItemCard'
 import { ItemForm } from '../components/ItemForm'
-import { ItemPreview, ItemPreviewAction, ItemPreviewTitle } from '../components/ItemPreview'
+import { ItemPreview, ItemPreviewTitle } from '../components/ItemPreview'
 import { MobileGridToggle } from '../components/MobileGridToggle'
 import { Modal } from '../components/Modal'
 import { QuickAddMenu } from '../components/QuickAddMenu'
@@ -14,6 +15,7 @@ import { useDelayedLoading } from '../hooks/useDelayedLoading'
 import { useItems } from '../hooks/useItems'
 import { useGridPreference } from '../hooks/useGridPreference'
 import { getGreeting } from '../lib/format'
+import { getAdaptiveItemSize } from '../lib/itemLayout'
 import type { Item, ItemType } from '../types/database'
 
 export function Dashboard() {
@@ -36,17 +38,18 @@ export function Dashboard() {
   }
 
   const renderItem = (item: Item) => (
-    <ItemCard
-      item={item}
-      key={item.id}
-      onDelete={(current) => deleteItem(current.id)}
-      onEdit={setEditingItem}
-      onPreview={setPreviewItem}
-      onTogglePin={(current) =>
-        updateItem(current.id, { is_pinned: !current.is_pinned })
-      }
-      previewHref={`#/${item.type === 'wishlist' ? 'wishlist' : `${item.type}s`}?preview=${item.id}`}
-    />
+    <AdaptiveGridItem key={item.id} size={getAdaptiveItemSize(item)} type={item.type}>
+      <ItemCard
+        item={item}
+        onDelete={(current) => deleteItem(current.id)}
+        onEdit={setEditingItem}
+        onPreview={item.type === 'link' ? undefined : setPreviewItem}
+        onTogglePin={(current) =>
+          updateItem(current.id, { is_pinned: !current.is_pinned })
+        }
+        previewHref={item.type === 'link' ? undefined : `#/${item.type === 'wishlist' ? 'wishlist' : `${item.type}s`}?preview=${item.id}`}
+      />
+    </AdaptiveGridItem>
   )
 
   return (
@@ -124,12 +127,12 @@ export function Dashboard() {
         </Modal>
       )}
 
-      {previewItem && (
+      {previewItem && previewItem.type !== 'link' && (
         <Modal
-          eyebrow={t('item.previewEyebrow')}
-          headerAction={<ItemPreviewAction item={previewItem} />}
+          eyebrow={t(`collection.${previewItem.type}.singular`)}
           onClose={() => setPreviewItem(null)}
           title={<ItemPreviewTitle item={previewItem} />}
+          variant="preview"
         >
           <ItemPreview item={previewItem} />
         </Modal>

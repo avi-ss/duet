@@ -22,10 +22,16 @@ export function ItemPreview({ item }: ItemPreviewProps) {
   const creatorName = creator?.user_id === membership?.user_id
     ? t('item.you')
     : creator?.display_name ?? t('item.partner')
+  const safeUrl = getSafeUrl(item.url)
 
   return (
     <div className={`item-preview item-preview-${item.type}`} data-member-color={creator?.profile_color ?? 'coral'}>
       {item.description && <p>{item.description}</p>}
+      {safeUrl && (
+        <a className="item-preview-open" href={safeUrl} rel="noreferrer" target="_blank">
+          {t('item.open')} <ExternalLink size={14} />
+        </a>
+      )}
       <div className="item-preview-footer">
         <span className="item-creator">
           <ProfileAvatar member={creator} name={creatorName} size={28} url={creator ? avatarUrls[creator.user_id] : undefined} />
@@ -48,17 +54,5 @@ export function ItemPreviewTitle({ item }: ItemPreviewProps) {
       </span>
       <span>{item.title}</span>
     </span>
-  )
-}
-
-export function ItemPreviewAction({ item }: ItemPreviewProps) {
-  const { t } = useLanguage()
-  const safeUrl = getSafeUrl(item.url)
-  if (!safeUrl) return null
-
-  return (
-    <a className="item-preview-open" href={safeUrl} rel="noreferrer" target="_blank">
-      {t('item.open')} <ExternalLink size={14} />
-    </a>
   )
 }

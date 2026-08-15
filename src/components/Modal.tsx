@@ -7,11 +7,11 @@ type ModalProps = PropsWithChildren<{
   title: ReactNode
   description?: string
   eyebrow?: string
-  headerAction?: ReactNode
   onClose: () => void
+  variant?: 'default' | 'preview'
 }>
 
-export function Modal({ title, description, eyebrow, headerAction, onClose, children }: ModalProps) {
+export function Modal({ title, description, eyebrow, onClose, variant = 'default', children }: ModalProps) {
   const { t } = useLanguage()
   const [isClosing, setIsClosing] = useState(false)
   const requestClose = () => setIsClosing(true)
@@ -30,11 +30,11 @@ export function Modal({ title, description, eyebrow, headerAction, onClose, chil
   })
 
   return createPortal(
-    <div className={`modal-backdrop ${isClosing ? 'is-closing' : ''}`} onMouseDown={requestClose}>
+    <div className={`modal-backdrop modal-backdrop-${variant} ${isClosing ? 'is-closing' : ''}`} onMouseDown={requestClose}>
       <section
         aria-labelledby="modal-title"
         aria-modal="true"
-        className="modal-card"
+        className={`modal-card modal-card-${variant}`}
         onAnimationEnd={(event) => {
           if (isClosing && event.currentTarget === event.target) onClose()
         }}
@@ -48,7 +48,6 @@ export function Modal({ title, description, eyebrow, headerAction, onClose, chil
             {description && <p>{description}</p>}
           </div>
           <div className="modal-header-actions">
-            {headerAction}
             <button
               aria-label={t('common.close')}
               className="icon-button"

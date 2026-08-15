@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link2, Plus, StickyNote, WandSparkles } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
+import { AdaptiveGridItem } from '../components/AdaptiveGrid'
 import { ItemCard } from '../components/ItemCard'
 import { ItemForm } from '../components/ItemForm'
-import { ItemPreview, ItemPreviewAction, ItemPreviewTitle } from '../components/ItemPreview'
+import { ItemPreview, ItemPreviewTitle } from '../components/ItemPreview'
 import { MobileGridToggle } from '../components/MobileGridToggle'
 import { Modal } from '../components/Modal'
 import { useLanguage } from '../contexts/LanguageContext'
 import { useDelayedLoading } from '../hooks/useDelayedLoading'
 import { useItems } from '../hooks/useItems'
 import { useGridPreference } from '../hooks/useGridPreference'
+import { getAdaptiveItemSize } from '../lib/itemLayout'
 import type { Item, ItemType } from '../types/database'
 
 type CollectionProps = {
@@ -47,9 +49,9 @@ export function Collection({ type }: CollectionProps) {
 
   useEffect(() => {
     const previewId = searchParams.get('preview')
-    if (!previewId || items.length === 0) return
+    if (type === 'link' || !previewId || items.length === 0) return
     setPreviewItem(items.find((item) => item.id === previewId) ?? null)
-  }, [items, searchParams])
+  }, [items, searchParams, type])
 
   const closeModal = () => {
     setModalOpen(false)
@@ -87,27 +89,30 @@ export function Collection({ type }: CollectionProps) {
           {[1, 2, 3, 4].map((number) => <div className="card-skeleton" key={number} />)}
         </div>
       ) : isLoading ? null : items.length > 0 ? (
-        <div className={`collection-grid ${type === 'note' ? 'note-grid' : ''} ${compact ? 'mobile-compact-grid' : ''}`}>
+        <div className={`collection-grid ${type === 'note' ? 'note-grid' : ''} ${type === 'link' ? 'link-grid' : ''} ${compact ? 'mobile-compact-grid' : ''}`}>
           {items.map((item) => (
-            <ItemCard
-              item={item}
-              key={item.id}
-              onDelete={(current) => deleteItem(current.id)}
-              onEdit={(current) => {
-                setEditingItem(current)
-                setModalOpen(true)
-              }}
-              onPreview={setPreviewItem}
-              onTogglePin={(current) =>
-                updateItem(current.id, { is_pinned: !current.is_pinned })
-              }
-              previewHref={`#/${type === 'wishlist' ? 'wishlist' : `${type}s`}?preview=${item.id}`}
-            />
+            <AdaptiveGridItem key={item.id} size={getAdaptiveItemSize(item)} type={item.type}>
+              <ItemCard
+                item={item}
+                onDelete={(current) => deleteItem(current.id)}
+                onEdit={(current) => {
+                  setEditingItem(current)
+                  setModalOpen(true)
+                }}
+                onPreview={type === 'link' ? undefined : setPreviewItem}
+                onTogglePin={(current) =>
+                  updateItem(current.id, { is_pinned: !current.is_pinned })
+                }
+                previewHref={type === 'link' ? undefined : `#/${type === 'wishlist' ? 'wishlist' : `${type}s`}?preview=${item.id}`}
+              />
+            </AdaptiveGridItem>
           ))}
-          <button className="add-card" onClick={() => setModalOpen(true)} type="button">
-            <span><Plus size={22} /></span>
-            {t('collection.add', { item: config.singular })}
-          </button>
+          <AdaptiveGridItem>
+            <button className="add-card" onClick={() => setModalOpen(true)} type="button">
+              <span><Plus size={22} /></span>
+              {t('collection.add', { item: config.singular })}
+            </button>
+          </AdaptiveGridItem>
         </div>
       ) : (
         <div className="collection-empty">
@@ -140,12 +145,12 @@ export function Collection({ type }: CollectionProps) {
         </Modal>
       )}
 
-      {previewItem && (
+      {previewItem && previewItem.type !== 'link' && (
         <Modal
-          eyebrow={t('item.previewEyebrow')}
-          headerAction={<ItemPreviewAction item={previewItem} />}
+          eyebrow={t(`collection.${previewItem.type}.singular`)}
           onClose={closePreview}
           title={<ItemPreviewTitle item={previewItem} />}
+          variant="preview"
         >
           <ItemPreview item={previewItem} />
         </Modal>

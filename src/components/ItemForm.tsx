@@ -45,7 +45,7 @@ export function ItemForm({
       await onSubmit({
         type,
         title: title.trim(),
-        description: description.trim() || null,
+        description: type === 'link' ? null : description.trim() || null,
         url: url.trim() || null,
       })
     } catch (caughtError) {
@@ -70,10 +70,14 @@ export function ItemForm({
 
       {(type === 'wishlist' || type === 'link') && (
         <label>
-          <span>{t('item.url')} <small>{t('common.optional')}</small></span>
+          <span>
+            {t('item.url')}
+            {type === 'wishlist' && <> <small>{t('common.optional')}</small></>}
+          </span>
           <input
             inputMode="url"
             onChange={(event) => setUrl(event.target.value)}
+            required={type === 'link'}
             placeholder="https://…"
             type="url"
             value={url}
@@ -81,16 +85,18 @@ export function ItemForm({
         </label>
       )}
 
-      <label>
-        <span>{type === 'note' ? t('item.note') : t('item.details')} <small>{t('common.optional')}</small></span>
-        <textarea
-          maxLength={1000}
-          onChange={(event) => setDescription(event.target.value)}
-          placeholder={placeholders[type].description}
-          rows={5}
-          value={description}
-        />
-      </label>
+      {type !== 'link' && (
+        <label>
+          <span>{type === 'note' ? t('item.note') : t('item.details')} <small>{t('common.optional')}</small></span>
+          <textarea
+            maxLength={1000}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder={placeholders[type].description}
+            rows={5}
+            value={description}
+          />
+        </label>
+      )}
 
       {error && <p className="form-error">{error}</p>}
 
